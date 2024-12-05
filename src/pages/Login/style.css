@@ -1,0 +1,18 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f0f2f5;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-card .ant-card-head-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+}
