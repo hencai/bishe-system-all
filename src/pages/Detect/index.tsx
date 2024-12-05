@@ -11,6 +11,7 @@ const Detect: React.FC = () => {
   const [previewImage, setPreviewImage] = useState<string>('');
   const [resultImage, setResultImage] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const API_BASE_URL = 'http://10.16.32.190:8000';  // 添加服务器基础 URL
 
   const handleUpload = async (file: File) => {
     const reader = new FileReader();
@@ -25,7 +26,7 @@ const Detect: React.FC = () => {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch('http://10.16.32.190:8000/api/detect', {
+      const response = await fetch(`${API_BASE_URL}/api/detect`, {
         method: 'POST',
         body: formData,
       });
@@ -33,8 +34,8 @@ const Detect: React.FC = () => {
       const data = await response.json();
 
       if (data.success) {
-        setResultImage(`http:/10.16.32.190:8000${data.image_url}`);
-        message.success'检测成功！');
+        setResultImage(`${API_BASE_URL}${data.image_url}`);
+        message.success('检测成功！');
       } else {
         message.error(`检测失败：${data.detail || '未知错误'}`);
         console.error('检测失败详情：', data);
