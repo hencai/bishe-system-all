@@ -34,7 +34,7 @@ const Detect: React.FC = () => {
 
       if (data.success) {
         setResultImage(`http:/10.16.32.190:8000${data.image_url}`);
-        message.success('检测成功！');
+        message.success'检测成功！');
       } else {
         message.error(`检测失败：${data.detail || '未知错误'}`);
         console.error('检测失败详情：', data);
