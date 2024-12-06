@@ -1,0 +1,33 @@
+.history-container {
+  padding: 24px;
+  background: #f0f2f5;
+  min-height: 100vh;
+}
+
+.history-container .ant-card {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.pagination-wrapper {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.ant-table-wrapper {
+  background: white;
+}
+
+.ant-image {
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.ant-table-cell .ant-image {
+  transition: transform 0.3s ease;
+}
+
+.ant-table-cell .ant-image:hover {
+  transform: scale(1.05);
+} 
