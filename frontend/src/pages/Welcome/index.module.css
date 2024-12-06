@@ -1,0 +1,32 @@
+.container {
+  padding: 24px;
+}
+
+.welcome {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.welcome h1 {
+  font-size: 28px;
+  color: #1890ff;
+  margin-bottom: 16px;
+}
+
+.welcome p {
+  font-size: 16px;
+  color: #666;
+}
+
+.introCard {
+  margin-top: 24px;
+}
+
+.introCard ul {
+  padding-left: 20px;
+}
+
+.introCard li {
+  margin: 8px 0;
+  color: #666;
+} 

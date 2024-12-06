@@ -1,0 +1,22 @@
+.logo {
+  height: 64px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  white-space: nowrap;
+  padding: 0 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.headerRight {
+  float: right;
+  margin-right: 24px;
+}
+
+.headerRight :global(.ant-avatar) {
+  cursor: pointer;
+  background: #1890ff;
+} 

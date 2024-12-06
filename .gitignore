@@ -1,2 +1,4 @@
-node_modules/
-backend/
+backend/checkpoints/
+backend/.idea/
+frontend/node_modules/
+local/node_modules/
