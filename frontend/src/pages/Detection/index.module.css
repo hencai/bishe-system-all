@@ -105,3 +105,8 @@
   color: #666;
   font-size: 12px;
 }
+
+.spinContainer {
+  position: relative;
+  min-height: 200px;
+}

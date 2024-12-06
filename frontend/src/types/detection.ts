@@ -1,26 +1,22 @@
-// 检测结果中的单个目标
-export interface Detection {
-  bbox: number[];     // 边界框坐标
-  score: number;      // 置信度分数
-}
-
-// 处理后的检测结果（用于前端显示）
-export interface ProcessedDetection {
-  label: string;
-  confidence: number;
-  bbox: number[];
-}
-
-// 页面使用的检测结果类型
-export interface DetectionResult {
-  detections: ProcessedDetection[];
-  resultImage: string;
-  processingTime: number;
-}
-
-// FastAPI 响应格式
+// API 响应的接口
 export interface DetectionResponse {
   success: boolean;
-  image_url: string;  // 结果图片的URL
-  detections: Detection[][];
+  image_url: string;
+  detections: Array<Array<{
+    bbox: number[];  // [x1, y1, x2, y2, angle]
+    score: number;
+  }>>;
+}
+
+// 单个检测结果的接口
+export interface Detection {
+  label: string;
+  bbox: [number, number, number, number, number];  // 包含旋转角度
+}
+
+// 整体检测结果的接口
+export interface DetectionResult {
+  detections: Detection[];
+  resultImage: string;
+  processingTime: number;
 }
