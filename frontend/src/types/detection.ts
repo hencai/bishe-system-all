@@ -10,13 +10,23 @@ export interface DetectionResponse {
 
 // 单个检测结果的接口
 export interface Detection {
+  bbox: number[];
+  score: number;
+  category: string;
   label: string;
-  bbox: [number, number, number, number, number];  // 包含旋转角度
 }
 
 // 整体检测结果的接口
 export interface DetectionResult {
+  taskId: string;
+  status: string;
+  result_image?: string;
+  resultImage?: string;
   detections: Detection[];
-  resultImage: string;
   processingTime: number;
+  detected_objects?: Array<{
+    bbox: number[];
+    score: number;
+    category: string;
+  }>;
 }

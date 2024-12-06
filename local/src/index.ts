@@ -2,10 +2,12 @@ import express from 'express';
 import cors from 'cors';
 import mysql from 'mysql2/promise';
 import type { RowDataPacket, ResultSetHeader } from 'mysql2';
+import detectionRoutes from './routes/detection.routes';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(detectionRoutes);
 
 interface DetectionRecord extends RowDataPacket {
   id: number;

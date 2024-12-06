@@ -8,32 +8,91 @@ import styles from './index.module.css';
 
 const DetectionPage: React.FC = () => {
   const [detectionResult, setDetectionResult] = useState<DetectionResult | null>(null);
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [fileList, setFileList] = useState<any[]>([]);
   const [uploading, setUploading] = useState(false);
 
-  const handleDetectionResponse = (response: DetectionResponse) => {
+  const handleDetectionComplete = (allDetections: Detection[], resultImageUrl: string) => {
+    setDetectionResult({
+      taskId: Date.now().toString(),
+      status: 'completed',
+      detections: allDetections,
+      resultImage: resultImageUrl,
+      processingTime: 0,
+      detected_objects: allDetections.map(d => ({
+        bbox: d.bbox,
+        score: d.score,
+        category: d.category
+      }))
+    });
+  };
+
+  const handleDetection = async () => {
+    if (fileList.length === 0) return;
+    
     try {
-      if (response.success) {
-        const resultImageUrl = `${process.env.REACT_APP_DETECTION_API_URL}${response.image_url}`;
-        
-        const allDetections: Detection[] = response.detections
-          .flat()
-          .map((det, index) => ({
-            label: `目标 ${index + 1}`,
-            bbox: det.bbox as [number, number, number, number, number]
-          }));
-        
-        setDetectionResult({
-          detections: allDetections,
-          resultImage: resultImageUrl,
-          processingTime: 0
-        });
-      } else {
-        message.error('检测失败');
+      setUploading(true);
+      const file = fileList[0].originFileObj;
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      console.log('Sending file:', file);
+      
+      const response = await fetch('http://10.16.32.190:8000/api/detect', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Detection API error:', errorData);
+        throw new Error(`Detection failed: ${response.statusText}`);
       }
+
+      const data = await response.json();
+      console.log('Detection response:', data);
+
+      if (!data.success) {
+        throw new Error('Detection failed');
+      }
+
+      const resultImageUrl = `http://10.16.32.190:8000${data.image_url}`;
+      
+      const allDetections: Detection[] = data.detections.map((det: any, index: number) => ({
+        label: `目标 ${index + 1}`,
+        bbox: det.bbox,
+        score: det.score,
+        category: det.category || '未知类别'
+      }));
+
+      try {
+        const recordData = {
+          originalImageUrl: URL.createObjectURL(file),
+          resultImageUrl: resultImageUrl,
+          detectedCount: allDetections.length,
+        };
+
+        const saveResponse = await fetch('http://localhost:3001/api/save-detection', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(recordData),
+        });
+
+        if (!saveResponse.ok) {
+          console.error('Failed to save detection record');
+        }
+      } catch (saveError) {
+        console.error('Error saving detection record:', saveError);
+      }
+
+      handleDetectionComplete(allDetections, resultImageUrl);
+      
     } catch (error) {
-      message.error('处理检测结果时出错');
-      console.error('处理检测结果错误:', error);
+      console.error('Detection failed:', error);
+      message.error('检测失败，请重试');
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -53,7 +112,7 @@ const DetectionPage: React.FC = () => {
       <div className={styles.results}>
         <div className={styles.statistics}>
           <div>检测目标总数：{detections.length}</div>
-          <div>检测耗时：{processingTime.toFixed(2)}秒</div>
+          <div>检测耗时：{processingTime.toFixed(2)}��</div>
         </div>
   
       </div>
@@ -63,29 +122,6 @@ const DetectionPage: React.FC = () => {
   const handleUpload = (info: any) => {
     setFileList(info.fileList.slice(-1));
     setDetectionResult(null);
-  };
-
-  const handleDetection = async () => {
-    if (fileList.length === 0) {
-      message.warning('请先上传图片');
-      return;
-    }
-
-    const file = fileList[0].originFileObj;
-    if (!file) {
-      message.error('文件获取��败');
-      return;
-    }
-
-    setUploading(true);
-    try {
-      const response = await detectObjects(file);
-      handleDetectionResponse(response);
-    } catch (error: any) {
-      message.error(error.message || '检测失败，请重试');
-    } finally {
-      setUploading(false);
-    }
   };
 
   return (
