@@ -28,15 +28,15 @@ const DetectionPage: React.FC = () => {
 
   const handleDetection = async () => {
     if (fileList.length === 0) return;
-    
+
     try {
       setUploading(true);
       const file = fileList[0].originFileObj;
       const formData = new FormData();
       formData.append('file', file);
-      
+
       console.log('Sending file:', file);
-      
+
       const response = await fetch('http://10.16.32.190:8000/api/detect', {
         method: 'POST',
         body: formData,
@@ -56,7 +56,7 @@ const DetectionPage: React.FC = () => {
       }
 
       const resultImageUrl = `http://10.16.32.190:8000${data.image_url}`;
-      
+
       const allDetections: Detection[] = data.detections.map((det: any, index: number) => ({
         label: `目标 ${index + 1}`,
         bbox: det.bbox,
@@ -87,7 +87,7 @@ const DetectionPage: React.FC = () => {
       }
 
       handleDetectionComplete(allDetections, resultImageUrl);
-      
+
     } catch (error) {
       console.error('Detection failed:', error);
       message.error('检测失败，请重试');
@@ -104,7 +104,7 @@ const DetectionPage: React.FC = () => {
       (acc: { [key: string]: number }, curr: Detection) => {
         acc[curr.label] = (acc[curr.label] || 0) + 1;
         return acc;
-      }, 
+      },
       {}
     );
 
@@ -112,9 +112,9 @@ const DetectionPage: React.FC = () => {
       <div className={styles.results}>
         <div className={styles.statistics}>
           <div>检测目标总数：{detections.length}</div>
-          <div>检测耗时：{processingTime.toFixed(2)}��</div>
+          <div>检测耗时：{processingTime.toFixed(2)}</div>
         </div>
-  
+
       </div>
     );
   };
