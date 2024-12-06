@@ -6,8 +6,6 @@ import {
   UserOutlined,
   HomeOutlined,
   AimOutlined,
-  FileImageOutlined,
-  HistoryOutlined,
   LogoutOutlined
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
