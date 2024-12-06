@@ -1,0 +1,19 @@
+.container {
+  padding: 24px;
+}
+
+.count {
+  color: #1890ff;
+  font-weight: 500;
+}
+
+.imageContainer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.imageArrow {
+  color: #1890ff;
+  font-size: 20px;
+} 
