@@ -85,8 +85,14 @@ const History = () => {
   const fetchRecords = async (page: number = 1, pageSize: number = 10) => {
     setLoading(true);
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(
-        `http://localhost:3001/api/records?page=${page}&pageSize=${pageSize}`
+        `http://localhost:3001/api/records?page=${page}&pageSize=${pageSize}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
       );
       const data = await response.json();
       
@@ -107,8 +113,12 @@ const History = () => {
   // 删除记录
   const handleDelete = async (id: number) => {
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(`http://localhost:3001/api/records/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
       
       if (response.ok) {
