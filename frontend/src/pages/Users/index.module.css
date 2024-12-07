@@ -1,0 +1,41 @@
+.container {
+  padding: 24px;
+}
+
+.avatar {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.username {
+  font-size: 16px;
+  font-weight: 500;
+  color: #1f1f1f;
+}
+
+.email {
+  font-size: 14px;
+  color: #666;
+}
+
+/* 添加一些动画效果 */
+.container :global(.ant-btn) {
+  transition: all 0.3s;
+}
+
+.container :global(.ant-btn:hover) {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.container :global(.ant-card) {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.container :global(.ant-table-thead > tr > th) {
+  background: #fafafa;
+}
+
+.container :global(.ant-table-tbody > tr:hover > td) {
+  background: #f5f5f5;
+}

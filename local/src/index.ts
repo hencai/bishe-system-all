@@ -4,6 +4,7 @@ import mysql from 'mysql2/promise';
 import type { RowDataPacket, ResultSetHeader } from 'mysql2';
 import detectionRoutes from './routes/detection.routes';
 import authRoutes from './routes/auth.routes';
+import userRoutes from './routes/user.routes';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -15,6 +16,7 @@ app.use(express.json());
 // 添加路由
 app.use('/api/auth', authRoutes);  // 新增认证路由
 app.use(detectionRoutes);
+app.use(userRoutes);
 
 interface DetectionRecord extends RowDataPacket {
   id: number;

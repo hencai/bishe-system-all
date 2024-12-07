@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { UserModel } from '../models/user.model';
+import bcrypt from 'bcryptjs';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -25,27 +26,29 @@ export class AuthController {
       res.status(201).json({ message: '注册成功' });
     } catch (error) {
       console.error('Register error:', error);
-      res.status(500).json({ message: '服务器错误' });
+      res.status(500).json({ mesage: '服务器错误' });
     }
   }
 
   static async login(req: Request, res: Response) {
     try {
       const { username, password } = req.body;
-
-      // 查找用户
       const user = await UserModel.findByUsername(username);
+
       if (!user) {
         return res.status(401).json({ message: '用户名或密码错误' });
       }
 
-      // 验证密码
-      const isValid = await UserModel.validatePassword(password, user.password);
-      if (!isValid) {
+      // 检查用户状态
+      if (user.status === 0) {
+        return res.status(403).json({ message: '账号已被禁用，请联系管理员' });
+      }
+
+      const isValidPassword = await bcrypt.compare(password, user.password);
+      if (!isValidPassword) {
         return res.status(401).json({ message: '用户名或密码错误' });
       }
 
-      // 生成 JWT
       const token = jwt.sign(
         { id: user.id, username: user.username },
         JWT_SECRET,
@@ -61,8 +64,8 @@ export class AuthController {
         }
       });
     } catch (error) {
-      console.error('Login error:', error);
-      res.status(500).json({ message: '��务器错误' });
+      console.error('登录失败:', error);
+      res.status(500).json({ message: '登录失败' });
     }
   }
 } 

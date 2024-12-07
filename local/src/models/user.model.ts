@@ -4,10 +4,12 @@ import { RowDataPacket, ResultSetHeader } from 'mysql2';
 
 // 用于数据库查询结果的接口
 export interface UserRow extends RowDataPacket {
-  id?: number;
+  id: number;
   username: string;
   password: string;
   email: string;
+  status: number;
+  created_at: Date;
 }
 
 // 用于创建用户的接口
@@ -18,12 +20,13 @@ export interface CreateUserDTO {
 }
 
 export class UserModel {
-  static async findByUsername(username: string): Promise<UserRow | undefined> {
+  static async findByUsername(username: string): Promise<UserRow | null> {
     const [rows] = await pool.query<UserRow[]>(
-      'SELECT * FROM users WHERE username = ?',
+      'SELECT id, username, password, email, status FROM users WHERE username = ?',
       [username]
     );
-    return rows[0];
+    
+    return rows.length > 0 ? rows[0] : null;
   }
 
   static async create(user: CreateUserDTO): Promise<ResultSetHeader> {
@@ -37,5 +40,48 @@ export class UserModel {
 
   static async validatePassword(password: string, hashedPassword: string): Promise<boolean> {
     return bcrypt.compare(password, hashedPassword);
+  }
+
+  static async findAll(limit: number, offset: number): Promise<{
+    users: UserRow[];
+    total: number;
+  }> {
+    const [users] = await pool.query<UserRow[]>(
+      'SELECT id, username, email, status, created_at FROM users LIMIT ? OFFSET ?',
+      [limit, offset]
+    );
+
+    const [countResult] = await pool.query<(RowDataPacket & { total: number })[]>(
+      'SELECT COUNT(*) as total FROM users'
+    );
+
+    return {
+      users,
+      total: countResult[0].total
+    };
+  }
+
+  static async update(id: number, data: { username?: string; email?: string }): Promise<ResultSetHeader> {
+    const [result] = await pool.query<ResultSetHeader>(
+      'UPDATE users SET ? WHERE id = ?',
+      [data, id]
+    );
+    return result;
+  }
+
+  static async updatePassword(id: number, hashedPassword: string): Promise<ResultSetHeader> {
+    const [result] = await pool.query<ResultSetHeader>(
+      'UPDATE users SET password = ? WHERE id = ?',
+      [hashedPassword, id]
+    );
+    return result;
+  }
+
+  static async updateStatus(id: number, status: boolean): Promise<ResultSetHeader> {
+    const [result] = await pool.query<ResultSetHeader>(
+      'UPDATE users SET status = ? WHERE id = ?',
+      [status ? 1 : 0, id]
+    );
+    return result;
   }
 } 

@@ -9,14 +9,31 @@ import { LoginForm } from '../../types/auth';
 const Login: React.FC = () => {
   const navigate = useNavigate();
 
-  const onFinish = async (values: LoginForm) => {
+  const onFinish = async (values: { username: string; password: string }) => {
     try {
       const response = await login(values);
-      localStorage.setItem('token', response.token);
-      message.success('登录成功！');
-      navigate('/welcome');
-    } catch (error) {
-      message.error('登录失败，请检查用户名和密码！');
+      if (response.token) {
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('user', JSON.stringify(response.user));
+        message.success('登录成功');
+        navigate('/');
+      }
+    } catch (error: any) {
+      // 处理不同的错误情况
+      if (error.response) {
+        switch (error.response.status) {
+          case 403:
+            message.error('账号已被禁用，请联系管理员');
+            break;
+          case 401:
+            message.error('用户名或密码错误');
+            break;
+          default:
+            message.error('登录失败，请重试');
+        }
+      } else {
+        message.error('登录失败，请重试');
+      }
     }
   };
 
