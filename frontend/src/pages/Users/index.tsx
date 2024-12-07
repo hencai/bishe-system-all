@@ -19,6 +19,7 @@ const Users: React.FC = () => {
   const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);
   const [isRoleModalVisible, setIsRoleModalVisible] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   const fetchUsers = async (page = currentPage, size = pageSize) => {
     try {
@@ -40,6 +41,11 @@ const Users: React.FC = () => {
   };
 
   useEffect(() => {
+    // 从 localStorage 获取当前用户信息
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      setCurrentUser(JSON.parse(userStr));
+    }
     fetchUsers();
   }, []);
 
@@ -49,10 +55,28 @@ const Users: React.FC = () => {
     form.resetFields();
   };
 
-  const handleModifyRole = (id: number, currentRole: string) => {
-    setCurrentUserId(id);
+  const handleModifyRole = (targetUser: User) => {
+    // 检查当前用户是否为管理员
+    if (currentUser?.role !== 'admin') {
+      message.error('只有管理员可以修改用户权限');
+      return;
+    }
+
+    // 检查是否试图修改自己的权限
+    if (targetUser.id === currentUser?.id) {
+      message.error('不能修改自己的权限，请联系高级管理员');
+      return;
+    }
+
+    // 检查是否试图修改其他管理员的权限
+    if (targetUser.role === 'admin') {
+      message.error('无权修改管理员权限，请联系高级管理员');
+      return;
+    }
+
+    setCurrentUserId(targetUser.id);
     setIsRoleModalVisible(true);
-    roleForm.setFieldsValue({ role: currentRole });
+    roleForm.setFieldsValue({ role: targetUser.role });
   };
 
   const handlePasswordModalOk = async () => {
@@ -78,11 +102,14 @@ const Users: React.FC = () => {
         message.success('权限修改成功');
         setIsRoleModalVisible(false);
         roleForm.resetFields();
-        fetchUsers(); // 刷新用户列表
+        fetchUsers();
       }
     } catch (error) {
-      console.error('修改权限失败:', error);
-      message.error('修改权限失败，请重试');
+      if (error instanceof Error) {
+        message.error(error.message);
+      } else {
+        message.error('修改权限失败，请重试');
+      }
     }
   };
 
@@ -96,7 +123,25 @@ const Users: React.FC = () => {
     roleForm.resetFields();
   };
 
-  const handleToggleStatus = async (id: number, currentStatus: number) => {
+  const handleToggleStatus = async (id: number, currentStatus: number, userRole: string) => {
+    // 检查是否为管理员
+    if (currentUser?.role !== 'admin') {
+      message.error('只有管理员可以修改用户状态');
+      return;
+    }
+
+    // 检查是否是自己
+    if (id === currentUser?.id) {
+      message.error('不能修改自己的状态');
+      return;
+    }
+
+    // 检查是否是其他管理员
+    if (userRole === 'admin') {
+      message.error('无权修改管理员状态，请联系高级管理员');
+      return;
+    }
+
     try {
       const newStatus = currentStatus === 0;
       await toggleUserStatus(id, newStatus);
@@ -175,13 +220,19 @@ const Users: React.FC = () => {
             type="primary" 
             size="small"
             onClick={() => handleModifyPassword(record.id)}
+            disabled={currentUser?.role !== 'admin' && currentUser?.id !== record.id}
           >
             修改密码
           </Button>
           <Button 
             type="primary"
             size="small"
-            onClick={() => handleModifyRole(record.id, record.role)}
+            onClick={() => handleModifyRole(record)}
+            disabled={
+              currentUser?.role !== 'admin' || 
+              record.role === 'admin' || 
+              record.id === currentUser?.id
+            }
           >
             修改权限
           </Button>
@@ -189,7 +240,12 @@ const Users: React.FC = () => {
             danger={record.status === 1} 
             type={record.status === 1 ? 'primary' : 'default'} 
             size="small"
-            onClick={() => handleToggleStatus(record.id, record.status)}
+            onClick={() => handleToggleStatus(record.id, record.status, record.role)}
+            disabled={
+              currentUser?.role !== 'admin' || 
+              record.id === currentUser?.id || 
+              record.role === 'admin'
+            }
           >
             {record.status === 1 ? '禁用' : '启用'}
           </Button>
