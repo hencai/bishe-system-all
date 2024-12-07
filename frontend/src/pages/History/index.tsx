@@ -17,7 +17,7 @@ const History = () => {
   const [records, setRecords] = useState<DetectionRecord[]>([]);
   const [pagination, setPagination] = useState({
     current: 1,
-    pageSize: 10,
+    pageSize: 3,
     total: 0
   });
 
@@ -82,7 +82,7 @@ const History = () => {
   ];
 
   // 获取历史记录
-  const fetchRecords = async (page: number = 1, pageSize: number = 10) => {
+  const fetchRecords = async (page: number = 1, pageSize: number = 3) => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
@@ -100,6 +100,7 @@ const History = () => {
       setPagination({
         ...pagination,
         current: page,
+        pageSize: pageSize,
         total: data.total
       });
     } catch (error) {
@@ -159,6 +160,7 @@ const History = () => {
             {...pagination}
             showQuickJumper
             showSizeChanger
+            pageSizeOptions={['3', '4', '5']}
             onChange={handlePageChange}
             onShowSizeChange={handlePageChange}
           />
