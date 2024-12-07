@@ -81,7 +81,7 @@ const Welcome: React.FC = () => {
       </div>
 
       {/* 原来home组件 */}
-      <div className={styles.container}>
+      <div>
         <Row gutter={[24, 24]} justify="center">
           <Col xs={24} sm={12} md={8}>
             <Card 
