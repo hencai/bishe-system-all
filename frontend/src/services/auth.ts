@@ -16,7 +16,7 @@ interface RegisterForm {
   email: string;
 }
 
-export const login = async (values: { username: string; password: string }): Promise<LoginResponse | null> => {
+export const login = async (values: { username: string; password: string }): Promise<LoginResponse> => {
   try {
     const response = await axios.post<LoginResponse>(`${API_URL}/api/auth/login`, {
       username: values.username,
@@ -28,9 +28,11 @@ export const login = async (values: { username: string; password: string }): Pro
     localStorage.setItem('user', JSON.stringify(user));
     
     return response.data;
-  } catch (error) {
-    console.error('登录失败:', error);
-    return null;
+  } catch (error: any) {
+    if (error.response?.data?.message) {
+      throw new Error(error.response.data.message);
+    }
+    throw new Error('登录失败，请稍后重试');
   }
 };
 

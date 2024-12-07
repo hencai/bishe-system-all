@@ -18,8 +18,14 @@ const Login: React.FC = () => {
         message.success('登录成功');
         navigate(from, { replace: true });
       }
-    } catch (error) {
-      message.error('登录失败，请重试');
+    } catch (error: any) {
+      if (error.message === '用户名或密码错误') {
+        message.error('用户名或密码错误');
+      } else if (error.message === '账号已被禁用，请联系管理员') {
+        message.error('账号已被禁用，请联系管理员');
+      } else {
+        message.error(error.message || '登录失败，请重试');
+      }
     }
   };
 

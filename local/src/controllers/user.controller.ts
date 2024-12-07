@@ -11,16 +11,18 @@ export class UserController {
       const { users, total } = await UserModel.findAll(pageSize, (page - 1) * pageSize);
       
       res.json({
-        records: users.map(user => ({
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          status: user.status,
-          created_at: user.created_at
-        })),
-        total,
-        current: page,
-        pageSize
+        data: {
+          records: users.map(user => ({
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            status: user.status,
+            created_at: user.created_at
+          })),
+          total,
+          current: page,
+          pageSize
+        }
       });
     } catch (error) {
       console.error('获取用户列表失败:', error);
@@ -35,7 +37,11 @@ export class UserController {
       const { username, email } = req.body;
       
       await UserModel.update(parseInt(id), { username, email });
-      res.json({ message: '更新成功' });
+      res.json({ 
+        data: {
+          message: '更新成功'
+        }
+      });
     } catch (error) {
       console.error('更新用户失败:', error);
       res.status(500).json({ message: '更新用户失败' });
@@ -51,8 +57,10 @@ export class UserController {
       
       await UserModel.updatePassword(parseInt(id), hashedPassword);
       res.json({ 
-        message: '密码重置成功',
-        newPassword // 在实际生产环境中应通过邮件发送新密码
+        data: {
+          message: '密码重置成功',
+          newPassword // 在实际生产环境中应通过邮件发送新密码
+        }
       });
     } catch (error) {
       console.error('重置密码失败:', error);
@@ -68,8 +76,10 @@ export class UserController {
       
       await UserModel.updateStatus(parseInt(id), status);
       res.json({ 
-        message: status ? '用户已启用' : '用户已禁用',
-        status: status
+        data: {
+          message: status ? '用户已启用' : '用户已禁用',
+          status: status
+        }
       });
     } catch (error) {
       console.error('更新用户状态失败:', error);
@@ -88,7 +98,9 @@ export class UserController {
       
       await UserModel.updatePassword(parseInt(id), hashedPassword);
       res.json({ 
-        message: '密码修改成功'
+        data: {
+          message: '密码修改成功'
+        }
       });
     } catch (error) {
       console.error('修改密码失败:', error);
