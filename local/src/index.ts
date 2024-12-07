@@ -15,7 +15,7 @@ app.use(express.json());
 
 // 修改路由注册方式
 app.use('/api/auth', authRoutes);  // 修改这里，移除路由前缀
-app.use(detectionRoutes);
+app.use('/', detectionRoutes);
 app.use(userRoutes);
 
 interface DetectionRecord extends RowDataPacket {

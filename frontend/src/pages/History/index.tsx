@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Table, Image, Button, Pagination, Spin, Popconfirm, message, Card } from 'antd';
-import { DeleteOutlined } from '@ant-design/icons';
+import { DeleteOutlined, DownloadOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import './index.css';
 
@@ -60,23 +60,32 @@ const History = () => {
     {
       title: '操作',
       key: 'action',
-      width: 100,
+      width: 200,
       align: 'center',
       render: (_, record) => (
-        <Popconfirm
-          title="确定要删除这条记录吗?"
-          onConfirm={() => handleDelete(record.id)}
-          okText="确定"
-          cancelText="取消"
-        >
-          <Button 
-            type="text" 
-            danger 
-            icon={<DeleteOutlined />}
+        <>
+          <Button
+            type="text"
+            icon={<DownloadOutlined />}
+            onClick={() => handleDownload(record.result_image)}
           >
-            删除
+            下载
           </Button>
-        </Popconfirm>
+          <Popconfirm
+            title="确定要删除这条记录吗?"
+            onConfirm={() => handleDelete(record.id)}
+            okText="确定"
+            cancelText="取消"
+          >
+            <Button 
+              type="text" 
+              danger 
+              icon={<DeleteOutlined />}
+            >
+              删除
+            </Button>
+          </Popconfirm>
+        </>
       ),
     },
   ];
@@ -132,6 +141,39 @@ const History = () => {
     } catch (error) {
       console.error('删除记录失败:', error);
       message.error('删除记录失败');
+    }
+  };
+
+  // 添加下载功能
+  const handleDownload = async (imageUrl: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      // 修改为通过后端 API 下载
+      const response = await fetch(`http://localhost:3001/api/download`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ imageUrl })
+      });
+      
+      if (!response.ok) throw new Error('下载失败');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `detection-result-${Date.now()}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      message.success('下载成功');
+    } catch (error) {
+      console.error('下载失败:', error);
+      message.error('下载失败');
     }
   };
 
