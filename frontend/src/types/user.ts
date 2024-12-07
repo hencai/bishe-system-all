@@ -6,9 +6,4 @@ export interface User {
   created_at: string;
 }
 
-export interface UserListResponse {
-  data: User[];
-  total: number;
-  page: number;
-  pageSize: number;
-}
+export interface UserListResponse extends Array<User> {}

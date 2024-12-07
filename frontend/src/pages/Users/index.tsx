@@ -10,8 +10,8 @@ const Users: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [total, setTotal] = useState(0);
-  const [currentPage, setCurentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(4);
   const [form] = Form.useForm();
   const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
@@ -20,15 +20,13 @@ const Users: React.FC = () => {
     try {
       setLoading(true);
       const response = await getUsers({ page, pageSize: size });
+      console.log('获取到的用户数据:', response);
       
-      if (response && Array.isArray(response)) {
+      if (response) {
         setUsers(response);
         setTotal(response.length);
-      } else if (response && 'data' in response) {
-        setUsers(response.data);
-        setTotal(response.total || 0);
-        setCurentPage(response.page || 1);
-        setPageSize(response.pageSize || 10);
+        setCurrentPage(page);
+        setPageSize(size);
       }
     } catch (error) {
       console.error('获取用户列表失败:', error);
@@ -40,7 +38,6 @@ const Users: React.FC = () => {
 
   useEffect(() => {
     fetchUsers();
-    console.log('当前users状态:', users);
   }, []);
 
   const handleModifyPassword = (id: number) => {
@@ -123,8 +120,8 @@ const Users: React.FC = () => {
       key: 'status',
       width: 120,
       render: (_, record) => (
-        <Tag color={record.status ? 'green' : 'red'}>
-          {record.status ? '正常' : '已禁用'}
+        <Tag color={record.status === 1 ? 'green' : 'red'}>
+          {record.status === 1 ? '正常' : '已禁用'}
         </Tag>
       ),
     },
@@ -142,12 +139,12 @@ const Users: React.FC = () => {
             修改密码
           </Button>
           <Button 
-            danger={!!record.status} 
-            type={record.status ? 'primary' : 'default'} 
+            danger={record.status === 1} 
+            type={record.status === 1 ? 'primary' : 'default'} 
             size="small"
             onClick={() => handleToggleStatus(record.id, record.status)}
           >
-            {record.status ? '禁用' : '启用'}
+            {record.status === 1 ? '禁用' : '启用'}
           </Button>
         </Space>
       ),
@@ -156,7 +153,7 @@ const Users: React.FC = () => {
 
   const handleTableChange = (page: number, size: number) => {
     console.log('分页变化:', { page, size });
-    setCurentPage(page);
+    setCurrentPage(page);
     setPageSize(size);
     fetchUsers(page, size);
   };
@@ -175,6 +172,7 @@ const Users: React.FC = () => {
             total: total,
             showSizeChanger: true,
             showQuickJumper: true,
+            pageSizeOptions: ['4', '5', '6'],
             showTotal: (total) => `共 ${total} 条记录`,
             onChange: handleTableChange,
           }}

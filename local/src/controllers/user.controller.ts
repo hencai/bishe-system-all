@@ -7,13 +7,19 @@ export class UserController {
   static async getUsers(req: Request, res: Response) {
     try {
       const page = parseInt(req.query.page as string) || 1;
-      const pageSize = parseInt(req.query.pageSize as string) || 10;
+      const pageSize = parseInt(req.query.pageSize as string) || 4;
       const { users, total } = await UserModel.findAll(pageSize, (page - 1) * pageSize);
       
       res.json({
-        data: users,
+        records: users.map(user => ({
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          status: user.status,
+          created_at: user.created_at
+        })),
         total,
-        page,
+        current: page,
         pageSize
       });
     } catch (error) {

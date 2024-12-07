@@ -1,5 +1,5 @@
 import request from '../utils/request';
-import type { UserListResponse } from '../types/user';
+import type { User } from '../types/user';
 
 interface ResetPasswordResponse {
   newPassword: string;
@@ -11,8 +11,8 @@ interface PasswordChangeData {
   confirmPassword: string;
 }
 
-export const getUsers = async (params: { page: number; pageSize: number }) => {
-  const response = await request.get<UserListResponse>('/api/users', { params });
+export const getUsers = async (params: { page: number; pageSize: number }): Promise<User[]> => {
+  const response = await request.get<User[]>('/api/users', { params });
   return response.data;
 };
 

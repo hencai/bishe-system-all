@@ -19,6 +19,18 @@ export interface CreateUserDTO {
   email: string;
 }
 
+interface UserRecord {
+  id: number;
+  username: string;
+  email: string;
+  status: number;
+  created_at: Date;
+}
+
+interface CountResult {
+  total: number;
+}
+
 export class UserModel {
   static async findByUsername(username: string): Promise<UserRow | null> {
     const [rows] = await pool.query<UserRow[]>(
@@ -42,23 +54,27 @@ export class UserModel {
     return bcrypt.compare(password, hashedPassword);
   }
 
-  static async findAll(limit: number, offset: number): Promise<{
-    users: UserRow[];
-    total: number;
-  }> {
-    const [users] = await pool.query<UserRow[]>(
-      'SELECT id, username, email, status, created_at FROM users LIMIT ? OFFSET ?',
-      [limit, offset]
-    );
+  static async findAll(limit: number, offset: number) {
+    try {
+      // 获取总数
+      const [countResult] = await pool.query<RowDataPacket[]>(
+        'SELECT COUNT(*) as total FROM users'
+      );
+      const total = countResult[0].total;
 
-    const [countResult] = await pool.query<(RowDataPacket & { total: number })[]>(
-      'SELECT COUNT(*) as total FROM users'
-    );
+      // 获取分页数据
+      const [users] = await pool.query<UserRow[]>(
+        'SELECT id, username, email, status, created_at FROM users ORDER BY created_at DESC LIMIT ? OFFSET ?',
+        [limit, offset]
+      );
 
-    return {
-      users,
-      total: countResult[0].total
-    };
+      return {
+        users,
+        total
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 
   static async update(id: number, data: { username?: string; email?: string }): Promise<ResultSetHeader> {
