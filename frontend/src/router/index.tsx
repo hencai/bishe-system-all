@@ -1,8 +1,9 @@
 import { createBrowserRouter } from 'react-router-dom';
-import Layout from '../components/Layout';
-import Home from '../pages/Home';
+import Layout from '../components/Layout/MainLayout';
+import Welcome from '../pages/Welcome';
 import Detection from '../pages/Detection';
-import History from '../pages/history';
+import History from '../pages/History/history'; 
+import Users from '../pages/Users';
 
 const router = createBrowserRouter([
   {
@@ -11,7 +12,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: '/',
-        element: <Home />,
+        element: <Welcome />,
       },
       {
         path: '/detection',
@@ -20,6 +21,10 @@ const router = createBrowserRouter([
       {
         path: '/history',
         element: <History />,
+      },
+      {
+        path: '/users',
+        element: <Users />,
       },
     ],
   },

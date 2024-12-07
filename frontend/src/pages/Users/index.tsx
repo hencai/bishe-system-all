@@ -6,7 +6,7 @@ import { getDetectionHistory, deleteDetectionHistory } from '../../services/hist
 import type { DetectionHistory } from '../../types/history';
 import styles from './index.module.css';
 
-const HistoryPage: React.FC = () => {
+const Users: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState<DetectionHistory[]>([]);
 
@@ -128,4 +128,4 @@ const HistoryPage: React.FC = () => {
   );
 };
 
-export default HistoryPage;
+export default Users;
