@@ -17,7 +17,7 @@ export class AuthController {
       }
 
       // 创建新用户
-      await UserModel.crete({
+      await UserModel.create({
         username,
         password,
         email
