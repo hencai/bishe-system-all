@@ -20,7 +20,6 @@ const Users: React.FC = () => {
     try {
       setLoading(true);
       const response = await getUsers({ page, pageSize: size });
-      console.log('获取到的用户数据:', response);
       
       if (response && Array.isArray(response)) {
         setUsers(response);
