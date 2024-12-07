@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Table, Image, Button, Pagination, Spin, Popconfirm, message, Card } from 'antd';
 import { DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
-import '../../styles/history.css';
+import './index.css';
 
 interface DetectionRecord {
   id: number;
