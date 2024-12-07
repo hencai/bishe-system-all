@@ -134,7 +134,7 @@ const DetectionPage: React.FC = () => {
       <Card>
         <div className={styles.spinContainer}>
           <Spin spinning={uploading}>
-            <Space direction="vertical" size="large" style={{ width: '100%' }}>
+            <Space direction="vertical" size="large" style={{ width: '100%', gap: 0 }}>
               <Card title="图像上传与检测" className={styles.card}>
                 <Space direction="vertical" size="middle" style={{ width: '100%' }}>
                   <Upload
