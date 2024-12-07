@@ -44,7 +44,7 @@ const MainLayout: React.FC = () => {
 
   const menuItems = [
     {
-      key: '/',
+      key: '/welcome',
       icon: <HomeOutlined />,
       label: '首页',
     },
@@ -71,10 +71,8 @@ const MainLayout: React.FC = () => {
   };
 
   const getSelectedKey = () => {
-    if (location.pathname === '/') {
-      return '/';
-    }
-    return location.pathname;
+    const pathname = location.pathname;
+    return pathname === '/' ? '/welcome' : pathname;
   };
 
   return (
@@ -88,12 +86,7 @@ const MainLayout: React.FC = () => {
             selectedKeys={[getSelectedKey()]}
             items={menuItems}
             onClick={({ key }) => handleMenuClick(key)}
-            style={{ 
-              flex: 1, 
-              minWidth: 0,
-              backgroundColor: 'transparent'
-            }}
-            className={styles.mainMenu}
+            style={{ flex: 1, minWidth: 0 }}
           />
           {userInfo && (
             <Dropdown overlay={userMenu} placement="bottomRight">

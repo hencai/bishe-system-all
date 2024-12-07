@@ -48,7 +48,3 @@
 .mainMenu :global(.ant-menu-item-selected) {
   background-color: #1890ff !important;  /* 使用 antd 的主题蓝色 */
 }
-
-.mainMenu :global(.ant-menu-item:not(.ant-menu-item-selected):hover) {
-  background-color: rgba(24, 144, 255, 0.8) !important;  /* 只在非选中项hover时显示半透明背景 */
-} 
