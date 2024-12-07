@@ -1,39 +1,25 @@
 import React from 'react';
 import { Form, Input, Button, Card, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { login } from '../../services/auth';
 import styles from './index.module.css';
 import { LoginForm } from '../../types/auth';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = (location.state as any)?.from?.pathname || '/';
 
   const onFinish = async (values: { username: string; password: string }) => {
     try {
       const response = await login(values);
-      if (response && response.token) {
-        localStorage.setItem('token', response.token);
-        localStorage.setItem('user', JSON.stringify(response.user));
+      if (response) {
         message.success('登录成功');
-        navigate('/');
+        navigate(from, { replace: true });
       }
-    } catch (error: any) {
-      // 处理不同的错误情况
-      if (error.response) {
-        switch (error.response.status) {
-          case 403:
-            message.error('账号已被禁用，请联系管理员');
-            break;
-          case 401:
-            message.error('用户名或密码错误');
-            break;
-          default:
-            message.error('登录失败，请重试');
-        }
-      } else {
-        message.error('登录失败，请重试');
-      }
+    } catch (error) {
+      message.error('登录失败，请重试');
     }
   };
 
