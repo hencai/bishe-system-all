@@ -54,6 +54,10 @@
   background-color: transparent;
 }
 
+.mainMenu:hover {
+  cursor: pointer;
+}
+
 .mainMenu :global(.ant-menu-item-selected) {
   background-color: #1890ff !important;  /* 使用 antd 的主题蓝色 */
 }
