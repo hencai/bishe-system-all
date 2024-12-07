@@ -1,6 +1,6 @@
 import { Layout, Menu, Avatar, Dropdown, message } from 'antd';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { HomeOutlined, CameraOutlined, HistoryOutlined, UserOutlined, LogoutOutlined } from '@ant-design/icons';
+import { HomeOutlined, CameraOutlined, HistoryOutlined, UserOutlined, LogoutOutlined, TeamOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import { logout } from '../../services/auth';
 import styles from './MainLayout.module.css';
@@ -60,7 +60,7 @@ const MainLayout: React.FC = () => {
     },
     {
       key: '/users',
-      icon: <HistoryOutlined />,
+      icon: <TeamOutlined />,
       label: '用户管理',
     },
   ];
@@ -68,6 +68,13 @@ const MainLayout: React.FC = () => {
   const handleMenuClick = (key: string) => {
     console.log('Navigating to:', key);
     navigate(key);
+  };
+
+  const getSelectedKey = () => {
+    if (location.pathname === '/') {
+      return '/';
+    }
+    return location.pathname;
   };
 
   return (
@@ -78,15 +85,29 @@ const MainLayout: React.FC = () => {
           <Menu
             theme="dark"
             mode="horizontal"
-            selectedKeys={[location.pathname]}
+            selectedKeys={[getSelectedKey()]}
             items={menuItems}
             onClick={({ key }) => handleMenuClick(key)}
-            style={{ flex: 1, minWidth: 0 }}
+            style={{ 
+              flex: 1, 
+              minWidth: 0,
+              backgroundColor: 'transparent'
+            }}
+            className={styles.mainMenu}
           />
           {userInfo && (
             <Dropdown overlay={userMenu} placement="bottomRight">
               <div className={styles.userInfo}>
-                <Avatar size="small" icon={<UserOutlined />} src={userInfo.avatar} />
+                <Avatar 
+                  size="small" 
+                  icon={<UserOutlined />} 
+                  src={userInfo.avatar}
+                  style={{ 
+                    backgroundColor: '#1890ff',  // 使用 antd 的主题蓝色
+                    color: '#fff',               // 图标颜色设为白色
+                    border: '2px solid #fff'     // 添加白色边框增加边界清晰度
+                  }}
+                />
                 <span className={styles.username}>{userInfo.username}</span>
               </div>
             </Dropdown>

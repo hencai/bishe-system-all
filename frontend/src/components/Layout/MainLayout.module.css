@@ -25,18 +25,30 @@
 .userInfo {
   display: flex;
   align-items: center;
+  gap: 8px;
+  padding: 0 8px;
   cursor: pointer;
-  margin-left: 24px;
-  padding: 0 12px;
 }
 
 .username {
-  margin-left: 8px;
   color: #fff;
+  margin-left: 8px;
 }
 
 .content {
   padding: 24px;
   background: #f0f2f5;
   min-height: calc(100vh - 64px);
+}
+
+.mainMenu {
+  background-color: transparent;
+}
+
+.mainMenu :global(.ant-menu-item-selected) {
+  background-color: #1890ff !important;  /* 使用 antd 的主题蓝色 */
+}
+
+.mainMenu :global(.ant-menu-item:not(.ant-menu-item-selected):hover) {
+  background-color: rgba(24, 144, 255, 0.8) !important;  /* 只在非选中项hover时显示半透明背景 */
 } 
