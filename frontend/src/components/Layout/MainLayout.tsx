@@ -42,7 +42,7 @@ const MainLayout: React.FC = () => {
   return (
     <Layout className={styles.layout}>
       <Header className={styles.header}>
-        <div className={styles.logo}>目标检测系统</div>
+        <div className={styles.logo}>遥感图像目标检测系统</div>
         <Menu
           theme="dark"
           mode="horizontal"
