@@ -3,7 +3,14 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #1890ff 0%, #722ed1 100%);
+  background-image: linear-gradient(
+    rgba(255, 255, 255, 0.15),     /* 白色半透明遮罩 */
+    rgba(255, 255, 255, 0.15)
+  ), url('/public/rs-bg.jpg');    /* 背景图片 */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: -2;
 }
 
 .card {

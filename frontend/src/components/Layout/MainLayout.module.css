@@ -39,6 +39,15 @@
   padding: 24px;
   background: #f0f2f5;
   min-height: calc(100vh - 64px);
+
+  background-image: linear-gradient(
+    rgba(255, 255, 255, 0.15),     /* 白色半透明遮罩 */
+    rgba(255, 255, 255, 0.15)
+  ), url('/public/rs-bg.jpg');    /* 背景图片 */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 99;
 }
 
 .mainMenu {

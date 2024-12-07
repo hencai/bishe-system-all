@@ -5,6 +5,15 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  background-image: linear-gradient(
+    rgba(255, 255, 255, 0.15),     /* 白色半透明遮罩 */
+    rgba(255, 255, 255, 0.15)
+  ), url('/public/rs-bg.jpg');    /* 背景图片 */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: -2;
 }
 
 #root {
