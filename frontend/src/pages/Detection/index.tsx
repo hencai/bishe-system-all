@@ -65,25 +65,30 @@ const DetectionPage: React.FC = () => {
       }));
 
       try {
+        const token = localStorage.getItem('token');
         const recordData = {
-          originalImageUrl: URL.createObjectURL(file),
-          resultImageUrl: resultImageUrl,
-          detectedCount: allDetections.length,
+          originalImage: URL.createObjectURL(file),
+          resultImage: resultImageUrl,
+          detectedCount: allDetections.length
         };
 
-        const saveResponse = await fetch('http://localhost:3001/api/save-detection', {
+        const saveResponse = await fetch('http://localhost:3001/api/records', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
           },
-          body: JSON.stringify(recordData),
+          body: JSON.stringify(recordData)
         });
 
         if (!saveResponse.ok) {
-          console.error('Failed to save detection record');
+          const errorData = await saveResponse.json();
+          console.error('Failed to save detection record:', errorData);
+          message.error('保存检测记录失败');
         }
       } catch (saveError) {
         console.error('Error saving detection record:', saveError);
+        message.error('保存检测记录失败');
       }
 
       handleDetectionComplete(allDetections, resultImageUrl);
