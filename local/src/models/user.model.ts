@@ -19,7 +19,7 @@ export interface CreateUserDTO {
 
 export class UserModel {
   static async findByUsername(username: string): Promise<UserRow | undefined> {
-    const [rows] = await pool.execute<UserRow[]>(
+    const [rows] = await pool.query<UserRow[]>(
       'SELECT * FROM users WHERE username = ?',
       [username]
     );
@@ -28,7 +28,7 @@ export class UserModel {
 
   static async create(user: CreateUserDTO): Promise<ResultSetHeader> {
     const hashedPassword = await bcrypt.hash(user.password, 10);
-    const [result] = await pool.execute<ResultSetHeader>(
+    const [result] = await pool.query<ResultSetHeader>(
       'INSERT INTO users (username, password, email) VALUES (?, ?, ?)',
       [user.username, hashedPassword, user.email]
     );

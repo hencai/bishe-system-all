@@ -3,10 +3,17 @@ import cors from 'cors';
 import mysql from 'mysql2/promise';
 import type { RowDataPacket, ResultSetHeader } from 'mysql2';
 import detectionRoutes from './routes/detection.routes';
+import authRoutes from './routes/auth.routes';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// 添加路由
+app.use('/api/auth', authRoutes);  // 新增认证路由
 app.use(detectionRoutes);
 
 interface DetectionRecord extends RowDataPacket {
@@ -85,6 +92,12 @@ app.delete('/api/records/:id', async (req, res) => {
     console.error('删除记录失败:', error);
     res.status(500).json({ error: '删除记录失败' });
   }
+});
+
+// 添加一个简单的错误处理中间件
+app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error('错误:', err);
+  res.status(500).json({ message: '服务器内部错误' });
 });
 
 const PORT = 3001;

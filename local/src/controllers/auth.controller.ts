@@ -12,7 +12,7 @@ export class AuthController {
       // 检查用户是否已存在
       const existingUser = await UserModel.findByUsername(username);
       if (existingUser) {
-        return res.status(40).json({ message: '用户名已存在' });
+        return res.status(400).json({ message: '用户名已存在' });
       }
 
       // 创建新用户
@@ -62,7 +62,7 @@ export class AuthController {
       });
     } catch (error) {
       console.error('Login error:', error);
-      res.status(500).json({ message: '服务器错误' });
+      res.status(500).json({ message: '��务器错误' });
     }
   }
 } 

@@ -1,55 +1,51 @@
-import { DataTypes, Model, ModelStatic } from 'sequelize';
-import sequelize from '../config/db';
+import pool from '../config/db';
+import { RowDataPacket, ResultSetHeader } from 'mysql2';
 
-interface DetectionRecordAttributes {
-  id?: number;
+export interface DetectionRecord extends RowDataPacket {
+  id: number;
   original_image: string;
   result_image: string;
   detected_count: number;
   detection_time: Date;
-  created_at?: Date;
-  updated_at?: Date;
 }
 
-interface DetectionRecordModel extends Model<DetectionRecordAttributes>, DetectionRecordAttributes {}
-
-const DetectionRecord: ModelStatic<DetectionRecordModel> = sequelize.define('DetectionRecord', {
-  id: {
-    type: DataTypes.INTEGER,
-    autoIncrement: true,
-    primaryKey: true,
-  },
-  original_image: {
-    type: DataTypes.STRING(255),
-    allowNull: false,
-  },
-  result_image: {
-    type: DataTypes.STRING(255),
-    allowNull: false,
-  },
-  detected_count: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    defaultValue: 0,
-  },
-  detection_time: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: DataTypes.NOW,
-  },
-  created_at: {
-    type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW,
-  },
-  updated_at: {
-    type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW,
+export class DetectionModel {
+  static async create(data: {
+    original_image: string;
+    result_image: string;
+    detected_count: number;
+  }): Promise<ResultSetHeader> {
+    const [result] = await pool.query<ResultSetHeader>(
+      'INSERT INTO detection_records (original_image, result_image, detected_count) VALUES (?, ?, ?)',
+      [data.original_image, data.result_image, data.detected_count]
+    );
+    return result;
   }
-}, {
-  tableName: 'detection_records',
-  timestamps: true,
-  createdAt: 'created_at',
-  updatedAt: 'updated_at'
-});
 
-export default DetectionRecord; 
+  static async findAll(limit: number, offset: number): Promise<{
+    records: DetectionRecord[];
+    total: number;
+  }> {
+    const [records] = await pool.query<DetectionRecord[]>(
+      'SELECT * FROM detection_records ORDER BY detection_time DESC LIMIT ? OFFSET ?',
+      [limit, offset]
+    );
+
+    const [countResult] = await pool.query<(RowDataPacket & { total: number })[]>(
+      'SELECT COUNT(*) as total FROM detection_records'
+    );
+
+    return {
+      records,
+      total: countResult[0].total
+    };
+  }
+
+  static async delete(id: number): Promise<ResultSetHeader> {
+    const [result] = await pool.query<ResultSetHeader>(
+      'DELETE FROM detection_records WHERE id = ?',
+      [id]
+    );
+    return result;
+  }
+} 

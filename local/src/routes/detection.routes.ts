@@ -1,9 +1,12 @@
 import { Router } from 'express';
-import { saveDetection, getDetectionHistory } from '../controllers/detection.controller';
+import { DetectionController } from '../controllers/detection.controller';
+import { authMiddleware } from '../middleware/auth.middleware';
 
 const router = Router();
 
-router.post('/api/save-detection', saveDetection);
-router.get('/api/detection-history', getDetectionHistory);
+// 添加认证中间件保护这些路由
+router.post('/api/records', authMiddleware, DetectionController.create);
+router.get('/api/records', authMiddleware, DetectionController.getList);
+router.delete('/api/records/:id', authMiddleware, DetectionController.delete);
 
 export default router; 
