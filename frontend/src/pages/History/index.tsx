@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Table, Image, Button, Pagination, Spin, Popconfirm, message, Card } from 'antd';
+import { Table, Image, Button, Pagination, Spin, Popconfirm, message, Card, Space } from 'antd';
 import { DeleteOutlined, DownloadOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import './index.css';
@@ -63,9 +63,10 @@ const History = () => {
       width: 200,
       align: 'center',
       render: (_, record) => (
-        <>
+        <Space size="middle">
           <Button
-            type="text"
+            type="primary"
+            size="small"
             icon={<DownloadOutlined />}
             onClick={() => handleDownload(record.result_image)}
           >
@@ -78,14 +79,15 @@ const History = () => {
             cancelText="取消"
           >
             <Button 
-              type="text" 
-              danger 
+              type="primary"
+              danger
+              size="small"
               icon={<DeleteOutlined />}
             >
               删除
             </Button>
           </Popconfirm>
-        </>
+        </Space>
       ),
     },
   ];
