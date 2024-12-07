@@ -1,0 +1,41 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  height: 64px;
+  background: #001529;
+  color: #fff;
+}
+
+.logo {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+}
+
+.userProfile {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 4px 12px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.userProfile:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.avatar {
+  background: #1890ff;
+}
+
+.username {
+  margin-left: 8px;
+  color: #fff;
+} 

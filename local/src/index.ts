@@ -13,8 +13,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 添加路由
-app.use('/api/auth', authRoutes);  // 新增认证路由
+// 修改路由注册方式
+app.use('/api/auth', authRoutes);  // 修改这里，移除路由前缀
 app.use(detectionRoutes);
 app.use(userRoutes);
 

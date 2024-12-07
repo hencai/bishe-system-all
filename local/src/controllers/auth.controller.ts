@@ -68,4 +68,17 @@ export class AuthController {
       res.status(500).json({ message: '登录失败' });
     }
   }
+
+  static async logout(req: Request, res: Response) {
+    try {
+      // 这里可以添加一些清理操作
+      // 比如：如果使用了黑名单机制，可以将token加入黑名单
+      // 如果使用了 Redis 存储会话，可以删除会话
+      
+      res.json({ message: '退出成功' });
+    } catch (error) {
+      console.error('退出失败:', error);
+      res.status(500).json({ message: '退出失败' });
+    }
+  }
 } 

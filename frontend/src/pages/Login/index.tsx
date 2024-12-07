@@ -12,7 +12,7 @@ const Login: React.FC = () => {
   const onFinish = async (values: { username: string; password: string }) => {
     try {
       const response = await login(values);
-      if (response.token) {
+      if (response && response.token) {
         localStorage.setItem('token', response.token);
         localStorage.setItem('user', JSON.stringify(response.user));
         message.success('登录成功');
