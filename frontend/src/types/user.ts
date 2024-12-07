@@ -4,6 +4,7 @@ export interface User {
   email: string;
   status: number;
   created_at: string;
+  role: 'admin' | 'user';
 }
 
 export interface getUsersResponse {

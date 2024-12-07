@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Table, Card, Tag, Button, Space, Avatar, Tooltip, message, Modal, Form, Input } from 'antd';
+import { Table, Card, Tag, Button, Space, Avatar, Tooltip, message, Modal, Form, Input, Select } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { UserOutlined, MailOutlined, CalendarOutlined, LockOutlined } from '@ant-design/icons';
-import { getUsers, resetUserPassword, toggleUserStatus } from '../../services/user';
+import { UserOutlined, MailOutlined, CalendarOutlined, LockOutlined, CrownOutlined } from '@ant-design/icons';
+import { getUsers, resetUserPassword, toggleUserStatus, updateUserRole } from '../../services/user';
 import type { User } from '../../types/user';
 import styles from './index.module.css';
+
+const { Option } = Select;
 
 const Users: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -13,7 +15,9 @@ const Users: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(4);
   const [form] = Form.useForm();
+  const [roleForm] = Form.useForm();
   const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);
+  const [isRoleModalVisible, setIsRoleModalVisible] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
   const fetchUsers = async (page = currentPage, size = pageSize) => {
@@ -45,6 +49,12 @@ const Users: React.FC = () => {
     form.resetFields();
   };
 
+  const handleModifyRole = (id: number, currentRole: string) => {
+    setCurrentUserId(id);
+    setIsRoleModalVisible(true);
+    roleForm.setFieldsValue({ role: currentRole });
+  };
+
   const handlePasswordModalOk = async () => {
     try {
       const values = await form.validateFields();
@@ -60,9 +70,30 @@ const Users: React.FC = () => {
     }
   };
 
+  const handleRoleModalOk = async () => {
+    try {
+      const values = await roleForm.validateFields();
+      if (currentUserId) {
+        await updateUserRole(currentUserId, values.role);
+        message.success('权限修改成功');
+        setIsRoleModalVisible(false);
+        roleForm.resetFields();
+        fetchUsers(); // 刷新用户列表
+      }
+    } catch (error) {
+      console.error('修改权限失败:', error);
+      message.error('修改权限失败，请重试');
+    }
+  };
+
   const handlePasswordModalCancel = () => {
     setIsPasswordModalVisible(false);
     form.resetFields();
+  };
+
+  const handleRoleModalCancel = () => {
+    setIsRoleModalVisible(false);
+    roleForm.resetFields();
   };
 
   const handleToggleStatus = async (id: number, currentStatus: number) => {
@@ -125,9 +156,19 @@ const Users: React.FC = () => {
       ),
     },
     {
+      title: '权限',
+      key: 'role',
+      width: 120,
+      render: (_, record) => (
+        <Tag color={record.role === 'admin' ? 'gold' : 'blue'} icon={record.role === 'admin' ? <CrownOutlined /> : <UserOutlined />}>
+          {record.role === 'admin' ? '管理员' : '普通用户'}
+        </Tag>
+      ),
+    },
+    {
       title: '操作',
       key: 'action',
-      width: 200,
+      width: 300,
       render: (_, record) => (
         <Space size="middle">
           <Button 
@@ -136,6 +177,13 @@ const Users: React.FC = () => {
             onClick={() => handleModifyPassword(record.id)}
           >
             修改密码
+          </Button>
+          <Button 
+            type="primary"
+            size="small"
+            onClick={() => handleModifyRole(record.id, record.role)}
+          >
+            修改权限
           </Button>
           <Button 
             danger={record.status === 1} 
@@ -149,13 +197,6 @@ const Users: React.FC = () => {
       ),
     },
   ];
-
-  const handleTableChange = (page: number, size: number) => {
-    console.log('分页变化:', { page, size });
-    setCurrentPage(page);
-    setPageSize(size);
-    fetchUsers(page, size);
-  };
 
   return (
     <div className={styles.container}>
@@ -173,7 +214,7 @@ const Users: React.FC = () => {
             showQuickJumper: true,
             pageSizeOptions: ['4', '5', '6'],
             showTotal: (total) => `共 ${total} 条记录`,
-            onChange: handleTableChange,
+            onChange: (page, pageSize) => fetchUsers(page, pageSize),
           }}
         />
       </Card>
@@ -216,6 +257,30 @@ const Users: React.FC = () => {
             ]}
           >
             <Input.Password placeholder="请再次输入新密码" />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        title="修改用户权限"
+        open={isRoleModalVisible}
+        onOk={handleRoleModalOk}
+        onCancel={handleRoleModalCancel}
+        destroyOnClose
+      >
+        <Form
+          form={roleForm}
+          layout="vertical"
+        >
+          <Form.Item
+            name="role"
+            label="用户权限"
+            rules={[{ required: true, message: '请选择用户权限' }]}
+          >
+            <Select placeholder="请选择用户权限">
+              <Option value="user">普通用户</Option>
+              <Option value="admin">管理员</Option>
+            </Select>
           </Form.Item>
         </Form>
       </Modal>

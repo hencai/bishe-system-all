@@ -1,29 +1,31 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-
-interface AuthRequest extends Request {
-  user?: {
-    id: number;
-    username: string;
-  };
+interface JwtPayload {
+  userId: number;
+  username: string;
+  role: string;
 }
 
-export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
-  const authHeader = req.headers.authorization;
-  
-  if (!authHeader) {
-    return res.status(401).json({ message: '未提供认证令牌' });
-  }
-
-  const token = authHeader.split(' ')[1];
-  
+export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { id: number; username: string };
-    req.user = decoded;
+    const token = req.headers.authorization?.split(' ')[1];
+    
+    if (!token) {
+      return res.status(401).json({ message: '未提供认证令牌' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as JwtPayload;
+    (req as any).user = decoded;
+    
+    console.log('Current user info:', decoded);
+    
     next();
   } catch (error) {
-    return res.status(401).json({ message: '无效的认证令牌' });
+    console.error('认证失败:', error);
+    res.status(401).json({ message: '认证失败' });
   }
-}; 
+};
+
+// 默认导出
+export default authMiddleware; 

@@ -1,5 +1,8 @@
 import request from '../utils/request';
+import { API_BASE_URL } from '../config/config';
 import type { getUsersResponse, User } from '../types/user';
+
+const getToken = () => localStorage.getItem('token') || '';
 
 interface ResetPasswordResponse {
   newPassword: string;
@@ -29,4 +32,14 @@ export const resetUserPassword = async (id: number, data: PasswordChangeData) =>
 export const toggleUserStatus = async (id: number, status: boolean) => {
   const response = await request.put(`/api/users/${id}/status`, { status });
   return response.data;
-}; 
+};
+
+export const updateUserRole = async (userId: number, role: string) => {
+  try {
+    const response = await request.put(`/api/users/${userId}/role`, { role });
+    return response.data;
+  } catch (error) {
+    console.error('修改权限失败:', error);
+    throw new Error('修改权限失败');
+  }
+};

@@ -1,57 +1,37 @@
 import { Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
 import { UserModel } from '../models/user.model';
 import bcrypt from 'bcryptjs';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+import jwt from 'jsonwebtoken';
 
 export class AuthController {
-  static async register(req: Request, res: Response) {
-    try {
-      const { username, password, email } = req.body;
-
-      // 检查用户是否已存在
-      const existingUser = await UserModel.findByUsername(username);
-      if (existingUser) {
-        return res.status(400).json({ message: '用户名已存在' });
-      }
-
-      // 创建新用户
-      await UserModel.create({
-        username,
-        password,
-        email
-      });
-      
-      res.status(201).json({ message: '注册成功' });
-    } catch (error) {
-      console.error('Register error:', error);
-      res.status(500).json({ mesage: '服务器错误' });
-    }
-  }
-
   static async login(req: Request, res: Response) {
     try {
+      console.log('Login request body:', req.body);
       const { username, password } = req.body;
+      
+      // 先尝试通过用户名查找
       const user = await UserModel.findByUsername(username);
-
+      console.log('Found user:', user ? { ...user, password: '[HIDDEN]' } : null);
+      
       if (!user) {
         return res.status(401).json({ message: '用户名或密码错误' });
       }
 
-      // 检查用户状态
-      if (user.status === 0) {
-        return res.status(403).json({ message: '账号已被禁用，请联系管理员' });
-      }
-
+      // 验证密码
       const isValidPassword = await bcrypt.compare(password, user.password);
+      console.log('Password validation result:', isValidPassword);
+
       if (!isValidPassword) {
         return res.status(401).json({ message: '用户名或密码错误' });
       }
 
       const token = jwt.sign(
-        { id: user.id, username: user.username },
-        JWT_SECRET,
+        { 
+          userId: user.id, 
+          username: user.username,
+          role: user.role
+        },
+        process.env.JWT_SECRET || 'your-secret-key',
         { expiresIn: '24h' }
       );
 
@@ -60,7 +40,7 @@ export class AuthController {
         user: {
           id: user.id,
           username: user.username,
-          email: user.email
+          role: user.role
         }
       });
     } catch (error) {
@@ -69,16 +49,41 @@ export class AuthController {
     }
   }
 
-  static async logout(req: Request, res: Response) {
+  static async register(req: Request, res: Response) {
     try {
-      // 这里可以添加一些清理操作
-      // 比如：如果使用了黑名单机制，可以将token加入黑名单
-      // 如果使用了 Redis 存储会话，可以删除会话
-      
-      res.json({ message: '退出成功' });
+      const { username, password, email } = req.body;
+
+      // 检查用户是否已存在
+      const existingUser = await UserModel.findByUsername(username);
+      if (existingUser) {
+        return res.status(400).json({ message: '用户名已被注册' });
+      }
+
+      // 加密密码
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+
+      // 创建新用户
+      await UserModel.create({
+        username,
+        email,
+        password: hashedPassword,
+        role: 'user'
+      });
+
+      res.status(201).json({ message: '注册成功' });
     } catch (error) {
-      console.error('退出失败:', error);
-      res.status(500).json({ message: '退出失败' });
+      console.error('注册失败:', error);
+      res.status(500).json({ message: '注册失败' });
     }
   }
-} 
+
+  static async logout(req: Request, res: Response) {
+    try {
+      res.json({ message: '退出登录成功' });
+    } catch (error) {
+      console.error('退出登录失败:', error);
+      res.status(500).json({ message: '退出登录失败' });
+    }
+  }
+}

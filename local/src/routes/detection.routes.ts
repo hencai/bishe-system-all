@@ -1,21 +1,28 @@
 import { Router, Request, Response } from 'express';
 import { DetectionController } from '../controllers/detection.controller';
-import { authMiddleware } from '../middleware/auth.middleware';
+import authMiddleware from '../middleware/auth.middleware';
 
 const router = Router();
 
+// 使用认证中间件
+router.use(authMiddleware);
+
 // 添加测试路由
-router.get('/api/test', (req, res) => {
+router.get('/api/test', (req: Request, res: Response) => {
   res.json({ message: 'Test route works!' });
 });
 
 // 添加认证中间件保护这些路由
-router.post('/api/records', authMiddleware, DetectionController.create);
-router.get('/api/records', authMiddleware, DetectionController.getList);
-router.delete('/api/records/:id', authMiddleware, DetectionController.delete);
+router.post('/api/records', DetectionController.create);
+router.get('/api/records', DetectionController.getList);
+router.delete('/api/records/:id', DetectionController.delete);
 
 // 下载路由
-router.post('/api/download', authMiddleware, async (req: Request<any, any, { imageUrl: string }>, res: Response) => {
+interface DownloadRequestBody {
+  imageUrl: string;
+}
+
+router.post('/api/download', async (req: Request<{}, {}, DownloadRequestBody>, res: Response) => {
   try {
     const { imageUrl } = req.body;
     
