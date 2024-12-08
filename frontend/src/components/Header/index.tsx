@@ -6,8 +6,10 @@ import { logout } from '../../services/auth';
 import styles from './index.module.css';
 
 interface UserInfo {
+  id: number;
   username: string;
-  avatar?: string;
+  email: string;
+  role: string;
 }
 
 const Header: React.FC = () => {
@@ -15,15 +17,19 @@ const Header: React.FC = () => {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
   useEffect(() => {
-    // 从localStorage获取用户信息
+    // 从localStorage获取当前登录用户信息
     const userStr = localStorage.getItem('user');
     if (userStr) {
-      setUserInfo(JSON.parse(userStr));
+      const user = JSON.parse(userStr);
+      setUserInfo(user);
+    } else {
+      navigate('/login');
     }
-  }, []);
+  }, [navigate]);
 
   const handleLogout = () => {
-    logout(); // 调用 auth service 中的 logout
+    logout();
+    localStorage.removeItm('user'); // 确保清除用户信息
     navigate('/login');
   };
 
@@ -44,8 +50,7 @@ const Header: React.FC = () => {
             <div className={styles.userProfile}>
               <Avatar 
                 size="small" 
-                icon={<UserOutlined />} 
-                src={userInfo.avatar}
+                icon={<UserOutlined />}
                 className={styles.avatar}
               />
               <span className={styles.username}>{userInfo.username}</span>
