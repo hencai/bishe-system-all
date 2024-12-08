@@ -1,4 +1,4 @@
-import {Request, Resonse } from 'express';
+import { Request, Response } from 'express';
 import { UserModel } from '../models/user.model';
 import bcrypt from 'bcryptjs';
 
