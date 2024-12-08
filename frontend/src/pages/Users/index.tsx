@@ -153,6 +153,27 @@ const Users: React.FC = () => {
     }
   };
 
+  // 判断是否可以修改密码
+  const canModifyPassword = (targetUser: User) => {
+    // 如果是管理员：可以修改自己和普通用户的密码
+    if (currentUser?.role === 'admin') {
+      // 可以修改自己的密码和普通用户的密码
+      return targetUser.id === currentUser.id || targetUser.role === 'user';
+    }
+    // 如果是普通用户：只能修改自己的密码
+    return targetUser.id === currentUser?.id;
+  };
+
+  // 判断是否可以修改权限和状态
+  const canModifyRoleAndStatus = (targetUser: User) => {
+    // 如果是管理员：只能操作普通用户，不能操作自己和其他管理员
+    if (currentUser?.role === 'admin') {
+      return targetUser.role === 'user';
+    }
+    // 普通用户不能修改任何人的权限和状态
+    return false;
+  };
+
   const columns: ColumnsType<User> = [
     {
       title: '用户信息',
@@ -220,7 +241,7 @@ const Users: React.FC = () => {
             type="primary" 
             size="small"
             onClick={() => handleModifyPassword(record.id)}
-            disabled={currentUser?.role !== 'admin' && currentUser?.id !== record.id}
+            disabled={!canModifyPassword(record)}
           >
             修改密码
           </Button>
@@ -228,11 +249,7 @@ const Users: React.FC = () => {
             type="primary"
             size="small"
             onClick={() => handleModifyRole(record)}
-            disabled={
-              currentUser?.role !== 'admin' || 
-              record.role === 'admin' || 
-              record.id === currentUser?.id
-            }
+            disabled={!canModifyRoleAndStatus(record)}
           >
             修改权限
           </Button>
@@ -241,11 +258,7 @@ const Users: React.FC = () => {
             type={record.status === 1 ? 'primary' : 'default'} 
             size="small"
             onClick={() => handleToggleStatus(record.id, record.status, record.role)}
-            disabled={
-              currentUser?.role !== 'admin' || 
-              record.id === currentUser?.id || 
-              record.role === 'admin'
-            }
+            disabled={!canModifyRoleAndStatus(record)}
           >
             {record.status === 1 ? '禁用' : '启用'}
           </Button>
