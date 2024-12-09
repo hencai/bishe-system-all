@@ -71,7 +71,6 @@ const MainLayout: React.FC = () => {
   ];
 
   const handleMenuClick = (key: string) => {
-    console.log('Navigating to:', key);
     navigate(key);
   };
 

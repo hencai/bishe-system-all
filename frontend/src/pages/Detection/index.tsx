@@ -54,7 +54,6 @@ const DetectionPage: React.FC = () => {
       }
 
       const data = await response.json();
-      console.log('Detection response:', data);
 
       if (!data.success) {
         throw new Error('Detection failed');
@@ -78,7 +77,6 @@ const DetectionPage: React.FC = () => {
           detectedCount: allDetections.length
         };
 
-        console.log('Saving detection record:', recordData);
 
         const saveResponse = await fetch('http://localhost:3001/api/records', {
           method: 'POST',
@@ -94,7 +92,6 @@ const DetectionPage: React.FC = () => {
         }
 
         const saveResult = await saveResponse.json();
-        console.log('Save result:', saveResult);
 
       } catch (saveError) {
         console.error('Error saving detection record:', saveError);

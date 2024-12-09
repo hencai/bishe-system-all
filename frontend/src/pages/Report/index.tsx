@@ -44,7 +44,6 @@ const Report: React.FC = () => {
         }
       );
       const data = await response.json();
-      console.log('Fetched reports:', data);
 
       if (data.success) {
         setReports(data.data.records);
@@ -146,7 +145,6 @@ const Report: React.FC = () => {
       render: (text: string) => {
         const token = localStorage.getItem('token');
         const fileName = text.split('/').pop();
-        console.log('Image path:', fileName);
         
         return (
           <img 
