@@ -146,33 +146,41 @@ const History = () => {
     }
   };
 
-  // 添加下载功能
+  // 添加下��功能??
   const handleDownload = async (imageUrl: string) => {
     try {
       const token = localStorage.getItem('token');
-      // 修改为通过后端 API 下载
-      const response = await fetch(`http://localhost:3001/api/download`, {
-        method: 'POST',
+      const response = await fetch(imageUrl, {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ imageUrl })
+          'Authorization': `Bearer ${token}`
+        }
       });
-      
-      if (!response.ok) throw new Error('下载失败');
-      
+
+      if (!response.ok) {
+        throw new Error('下载失败');
+      }
+
+      // 获取文件名
+      const filename = imageUrl.split('/').pop() || `detection-result-${Date.now()}.jpg`;
+
+      // 获取图片数据并创建下载
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `detection-result-${Date.now()}.jpg`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
       
-      message.success('下载成功');
+      // 创建下载链接
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;  // 使用原始文件名
+      
+      // 模拟点击下载
+      document.body.appendChild(link);
+      link.click();
+      
+      // 清理
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }, 100);
     } catch (error) {
       console.error('下载失败:', error);
       message.error('下载失败');

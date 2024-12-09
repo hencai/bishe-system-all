@@ -1,6 +1,6 @@
 import { Layout, Menu, Avatar, Dropdown, message } from 'antd';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { HomeOutlined, CameraOutlined, HistoryOutlined, UserOutlined, LogoutOutlined, TeamOutlined } from '@ant-design/icons';
+import { HomeOutlined, CameraOutlined, HistoryOutlined, UserOutlined, LogoutOutlined, TeamOutlined, FileTextOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import { logout } from '../../services/auth';
 import styles from './MainLayout.module.css';
@@ -57,6 +57,11 @@ const MainLayout: React.FC = () => {
       key: '/history',
       icon: <HistoryOutlined />,
       label: '检测历史',
+    },
+    {
+      key: '/report',
+      icon: <FileTextOutlined />,
+      label: '报告管理',
     },
     {
       key: '/users',

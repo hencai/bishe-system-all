@@ -43,9 +43,10 @@ export class DetectionModel {
 
   static async delete(id: number): Promise<ResultSetHeader> {
     const [result] = await pool.query<ResultSetHeader>(
-      'DELETE FROM detection_records WHERE id = ?',
+      `DELETE FROM detection_records WHERE id = ?`,
       [id]
     );
+    
     return result;
   }
 } 

@@ -6,6 +6,8 @@ import History from '../pages/History/index';
 import Users from '../pages/Users';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
+import Report from '../pages/Report';
+import PrivateRoute from '../components/PrivateRoute';
 
 const router = createBrowserRouter([
   {
@@ -27,23 +29,51 @@ const router = createBrowserRouter([
   },
   {
     path: '/',
-    element: <Layout />,
+    element: (
+      <PrivateRoute>
+        <Layout />
+      </PrivateRoute>
+    ),
     children: [
       {
         path: 'welcome',
-        element: <Welcome />,
+        element: (
+          <PrivateRoute>
+            <Welcome />
+          </PrivateRoute>
+        ),
       },
       {
         path: 'detection',
-        element: <Detection />,
+        element: (
+          <PrivateRoute>
+            <Detection />
+          </PrivateRoute>
+        ),
       },
       {
         path: 'history',
-        element: <History />,
+        element: (
+          <PrivateRoute>
+            <History />
+          </PrivateRoute>
+        ),
       },
       {
         path: 'users',
-        element: <Users />,
+        element: (
+          <PrivateRoute>
+            <Users />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: 'report',
+        element: (
+          <PrivateRoute>
+            <Report />
+          </PrivateRoute>
+        ),
       },
       {
         path: '',
@@ -53,4 +83,4 @@ const router = createBrowserRouter([
   },
 ]);
 
-export default router; 
+export default router;

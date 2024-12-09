@@ -5,6 +5,7 @@ import Welcome from '../pages/Welcome';
 import Detection from '../pages/Detection';
 import History from '../pages/History';
 import Users from '../pages/Users';
+import Report from '../pages/Report';
 import NotFound from '../pages/NotFound';
 import MainLayout from '../components/Layout/MainLayout';
 import PrivateRoute from '../components/PrivateRoute';
@@ -55,6 +56,14 @@ export const routes: RouteObject[] = [
         element: (
           <PrivateRoute>
             <Users />
+          </PrivateRoute>
+        ) 
+      },
+      { 
+        path: 'report', 
+        element: (
+          <PrivateRoute>
+            <Report />
           </PrivateRoute>
         ) 
       },

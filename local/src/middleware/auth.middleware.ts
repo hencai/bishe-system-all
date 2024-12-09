@@ -2,30 +2,48 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
 interface JwtPayload {
-  userId: number;
-  username: string;
-  role: string;
+  id: number;
+  email: string;
 }
 
-export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
+declare global {
+  namespace Express {
+    interface Request {
+      user?: JwtPayload;
+    }
+  }
+}
+
+const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
-    
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({ 
+        success: false, 
+        message: '未提供认证token' 
+      });
+    }
+
+    const token = authHeader.split(' ')[1];
     if (!token) {
-      return res.status(401).json({ message: '未提供认证令牌' });
+      return res.status(401).json({ 
+        success: false, 
+        message: 'token格式错误' 
+      });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as JwtPayload;
-    (req as any).user = decoded;
+    req.user = decoded;
     
-    console.log('Current user info:', decoded);
-    
+    console.log('Auth middleware - User:', req.user);
     next();
   } catch (error) {
     console.error('认证失败:', error);
-    res.status(401).json({ message: '认证失败' });
+    return res.status(401).json({ 
+      success: false, 
+      message: '认证失败' 
+    });
   }
 };
 
-// 默认导出
 export default authMiddleware; 
