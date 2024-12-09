@@ -49,7 +49,7 @@ const Welcome: React.FC = () => {
             <Card>
               <Statistic
                 title="平均处理时间"
-                value={2.5}
+                value={1.2}
                 precision={1}
                 prefix={<ClockCircleOutlined />}
                 suffix="秒"
