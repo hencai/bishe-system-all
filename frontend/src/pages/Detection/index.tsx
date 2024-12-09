@@ -32,10 +32,17 @@ const DetectionPage: React.FC = () => {
     try {
       setUploading(true);
       const file = fileList[0].originFileObj;
+
+      // 将文件转换为 base64
+      const base64Image = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(file);
+      });
+
+      // 首先进行目标检测
       const formData = new FormData();
       formData.append('file', file);
-
-      console.log('Sending file:', file);
 
       const response = await fetch('http://10.16.32.190:8000/api/detect', {
         method: 'POST',
@@ -43,9 +50,7 @@ const DetectionPage: React.FC = () => {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Detection API error:', errorData);
-        throw new Error(`Detection failed: ${response.statusText}`);
+        throw new Error('Detection failed');
       }
 
       const data = await response.json();
@@ -57,20 +62,23 @@ const DetectionPage: React.FC = () => {
 
       const resultImageUrl = `http://10.16.32.190:8000${data.image_url}`;
 
-      const allDetections: Detection[] = data.detections.map((det: any, index: number) => ({
+      const allDetections = data.detections.map((det: any, index: number) => ({
         label: `目标 ${index + 1}`,
         bbox: det.bbox,
         score: det.score,
         category: det.category || '未知类别'
       }));
 
+      // 保存检测记录
       try {
         const token = localStorage.getItem('token');
         const recordData = {
-          originalImage: URL.createObjectURL(file),
+          originalImage: base64Image,  // 使用 base64 格式的图片数据
           resultImage: resultImageUrl,
           detectedCount: allDetections.length
         };
+
+        console.log('Saving detection record:', recordData);
 
         const saveResponse = await fetch('http://localhost:3001/api/records', {
           method: 'POST',
@@ -82,10 +90,12 @@ const DetectionPage: React.FC = () => {
         });
 
         if (!saveResponse.ok) {
-          const errorData = await saveResponse.json();
-          console.error('Failed to save detection record:', errorData);
-          message.error('保存检测记录失败');
+          throw new Error('Failed to save detection record');
         }
+
+        const saveResult = await saveResponse.json();
+        console.log('Save result:', saveResult);
+
       } catch (saveError) {
         console.error('Error saving detection record:', saveError);
         message.error('保存检测记录失败');

@@ -20,6 +20,10 @@ const History = () => {
     pageSize: 3,
     total: 0
   });
+  const [downloading, setDownloading] = useState<number | null>(null);
+
+  // 获取 token
+  const token = localStorage.getItem('token');
 
   // 表格列定义
   const columns: ColumnsType<DetectionRecord> = [
@@ -29,7 +33,7 @@ const History = () => {
       render: (url) => (
         <Image
           width={120}
-          src={url}
+          src={`http://localhost:3001/storage${url}?token=${token}`}
           placeholder={<Spin />}
         />
       )
@@ -68,9 +72,10 @@ const History = () => {
             type="primary"
             size="small"
             icon={<DownloadOutlined />}
-            onClick={() => handleDownload(record.result_image)}
+            onClick={() => handleDownload(record.result_image, record.id)}
+            loading={downloading === record.id}
           >
-            下载
+            {downloading === record.id ? '下载中' : '下载'}
           </Button>
           <Popconfirm
             title="确定要删除这条记录吗?"
@@ -135,7 +140,7 @@ const History = () => {
       
       if (response.ok) {
         message.success('删除成功');
-        // 重新加载当前页数据
+        // 重新加载当前页数
         fetchRecords(pagination.current, pagination.pageSize);
       } else {
         throw new Error('删除失败');
@@ -146,9 +151,17 @@ const History = () => {
     }
   };
 
-  // 添加下��功能??
-  const handleDownload = async (imageUrl: string) => {
+  // 修改下载功能
+  const handleDownload = async (imageUrl: string, recordId: number) => {
+    if (downloading === recordId) {
+      message.info('正在下载中，请稍候...');
+      return;
+    }
+
     try {
+      setDownloading(recordId);
+      message.loading('正在准备下载资源...', 0);
+      
       const token = localStorage.getItem('token');
       const response = await fetch(imageUrl, {
         headers: {
@@ -170,7 +183,7 @@ const History = () => {
       // 创建下载链接
       const link = document.createElement('a');
       link.href = url;
-      link.download = filename;  // 使用原始文件名
+      link.download = filename;
       
       // 模拟点击下载
       document.body.appendChild(link);
@@ -181,9 +194,14 @@ const History = () => {
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
       }, 100);
+
+      message.success('下载成功');
     } catch (error) {
       console.error('下载失败:', error);
-      message.error('下载失败');
+      message.error('资源正在生成中，请稍后重试');
+    } finally {
+      setDownloading(null);
+      message.destroy(); // 清除所有消息
     }
   };
 

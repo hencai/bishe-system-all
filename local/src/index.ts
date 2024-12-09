@@ -16,7 +16,8 @@ dotenv.config();
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // 静态文件访问的验证中间件
 const staticFileAuth = (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -104,14 +105,50 @@ app.post('/api/records', async (req, res) => {
   const { originalImage, resultImage, detectedCount } = req.body;
   
   try {
-    const [result] = await pool.query<ResultSetHeader>(
-      'INSERT INTO detection_records (original_image, result_image, detected_count) VALUES (?, ?, ?)',
-      [originalImage, resultImage, detectedCount]
-    );
-    res.status(201).json(result);
+    // 生成文件名
+    const timestamp = new Date().getTime();
+    const fileName = `detection_${timestamp}.jpg`;
+    const uploadDir = path.join(__dirname, '../storage/uploads');
+    const filePath = path.join(uploadDir, fileName);
+
+    // 确保目录存在
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    try {
+      // 从 base64 字符串中提取实际的图片数据
+      const base64Data = originalImage.replace(/^data:image\/\w+;base64,/, '');
+      const imageBuffer = Buffer.from(base64Data, 'base64');
+
+      // 保存图片到本地文件系统
+      await fs.promises.writeFile(filePath, imageBuffer);
+      console.log('Image saved successfully to:', filePath);
+
+      // 构造图片的访问 URL（相对路径）
+      const savedImagePath = `/uploads/${fileName}`;
+
+      // 保存记录到数据库
+      const [result] = await pool.query<ResultSetHeader>(
+        'INSERT INTO detection_records (original_image, result_image, detected_count) VALUES (?, ?, ?)',
+        [savedImagePath, resultImage, detectedCount]
+      );
+
+      res.status(201).json({
+        success: true,
+        data: result
+      });
+    } catch (error) {
+      console.error('Error saving image:', error);
+      throw new Error('Failed to save image: ' + (error instanceof Error ? error.message : String(error)));
+    }
   } catch (error) {
     console.error('保存记录失败:', error);
-    res.status(500).json({ error: '保存记录失败' });
+    res.status(500).json({ 
+      success: false,
+      message: '保存记录失败',
+      error: error instanceof Error ? error.message : String(error)
+    });
   }
 });
 
