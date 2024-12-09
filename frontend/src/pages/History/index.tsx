@@ -46,7 +46,7 @@ const History = () => {
       });
 
     } catch (error) {
-      console.error('获取历史记录失败:', error);
+      console.error('获取史记录失败:', error);
       message.error('获取历史记录失败');
     } finally {
       setLoading(false);
@@ -152,7 +152,13 @@ const History = () => {
       setDownloading(recordId);
       message.loading('正在准备下载检测结果...', 0);
       
-      const response = await fetch(imageUrl);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${imageUrl}?token=${token}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
 
       if (!response.ok) {
         throw new Error('下载失败');
@@ -202,6 +208,12 @@ const History = () => {
 
   return (
     <div className="history-container">
+      {downloading !== null && (
+        <div className="download-mask">
+          <Spin size="large" tip="正在下载..." />
+        </div>
+      )}
+      
       <Card title="检测历史记录" bordered={false}>
         <Table
           columns={columns}
@@ -224,5 +236,36 @@ const History = () => {
     </div>
   );
 };
+
+// 添加样式
+const styles = `
+.download-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.download-mask .ant-spin {
+  color: #fff;
+}
+
+.download-mask .ant-spin-text {
+  color: #fff;
+  margin-top: 8px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+`;
+
+// 添加样式到 head
+const styleSheet = document.createElement("style");
+styleSheet.innerText = styles;
+document.head.appendChild(styleSheet);
 
 export default History; 
