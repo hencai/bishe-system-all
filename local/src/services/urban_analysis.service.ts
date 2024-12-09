@@ -1,8 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import puppeteer from 'puppeteer';
-import PDFDocument from 'pdfkit';
-import { getDetectionResult } from './detection';
+import { getDetectionResult, getDetectionImageBase64 } from './detection';
 
 // DOTA数据集的目标类别
 const DOTA_CLASSES: Record<string, string> = {
@@ -15,7 +14,7 @@ const DOTA_CLASSES: Record<string, string> = {
   'ground-track-field': '田径场',
   'harbor': '港口',
   'bridge': '桥梁',
-  'large-v::ehicle': '大型车辆',
+  'large-vehicle': '大型车辆',
   'small-vehicle': '小型车辆',
   'helicopter': '直升机',
   'roundabout': '环岛',
@@ -37,14 +36,14 @@ interface AnalysisResult {
   suggestions: string[];
 }
 
-export class UrbanAnalysisService{
+export class UrbanAnalysisService {
   static analyzeDetectionResults(
-    detectionResults: DetectionResult[], 
-    imageWidth: number, 
+    detectionResults: DetectionResult[],
+    imageWidth: number,
     imageHeight: number
   ): AnalysisResult {
     const area_total = imageWidth * imageHeight;
-    
+
     // 统计各类设施数量
     const facilityStats: Record<string, number> = {};
     Object.keys(DOTA_CLASSES).forEach(key => {
@@ -53,7 +52,7 @@ export class UrbanAnalysisService{
 
     // 计算交通设施密度
     const transport_facilities = ['bridge', 'roundabout', 'large-vehicle', 'small-vehicle'];
-    const transportDensity = transport_facilities.reduce((sum, facility) => 
+    const transportDensity = transport_facilities.reduce((sum, facility) =>
       sum + (facilityStats[facility] || 0), 0) / (area_total / 1000000);
 
     // 计算公共设施数量
@@ -61,25 +60,25 @@ export class UrbanAnalysisService{
       'baseball-diamond', 'tennis-court', 'basketball-court',
       'ground-track-field', 'soccer-ball-field', 'swimming-pool'
     ];
-    const publicFacilities = public_facilities.reduce((sum, facility) => 
+    const publicFacilities = public_facilities.reduce((sum, facility) =>
       sum + (facilityStats[facility] || 0), 0);
 
     // 计算工业设施密度
     const industrial_facilities = ['storage-tank', 'harbor'];
-    const industrialDensity = industrial_facilities.reduce((sum, facility) => 
+    const industrialDensity = industrial_facilities.reduce((sum, facility) =>
       sum + (facilityStats[facility] || 0), 0) / (area_total / 1000000);
 
     return {
       facilityStats,
       transportDensity: Number(transportDensity.toFixed(2)),
       publicFacilities,
-      industrialDensity:Number(industrialDensity.toFixed(2)),
+      industrialDensity: Number(industrialDensity.toFixed(2)),
       suggestions: this.generateSuggestions(facilityStats, transportDensity, publicFacilities, industrialDensity)
     };
   }
 
   static generateSuggestions(
-    facilityStats:Record<string, number>,
+    facilityStats: Record<string, number>,
     transportDensity: number,
     publicFacilities: number,
     industrialDensity: number
@@ -107,15 +106,15 @@ export class UrbanAnalysisService{
     }
 
     if (facilityStats['storage-tank'] > 5) {
-      suggestions.push("储存设施集中，建议加强安全管理，建立完善::急响应机制。");
+      suggestions.push("储存设施集中，建议加强安全管理，建立完善应急响应机制。");
     }
 
     return suggestions;
   }
 
   static async generatePdfReport(
-    analysisResult: AnalysisResult, 
-    originalImagePath: string, 
+    analysisResult: AnalysisResult,
+    originalImagePath: string,
     resultImagePath: string
   ): Promise<string> {
     const outputPath = path.join('storage', 'reports', `urban_analysis_${Date.now()}.pdf`);
@@ -126,8 +125,11 @@ export class UrbanAnalysisService{
     const imageFile = new File([imageBuffer], path.basename(originalImagePath), { type: 'image/jpeg' });
     const detectionStats = await getDetectionResult(imageFile);
 
-    // 将图片转换为 base64
-    const originalImageBase64 = fs.existsSync(originalImagePath) 
+    // 获取检测结果图片的 base64
+    const detectionResultBase64 = await getDetectionImageBase64(imageFile);
+
+    // 将原始图片转换为 base64
+    const originalImageBase64 = fs.existsSync(originalImagePath)
       ? `data:image/jpeg;base64,${fs.readFileSync(originalImagePath, 'base64')}`
       : '';
 
@@ -158,6 +160,7 @@ export class UrbanAnalysisService{
             .content { 
               font-size: 14px; 
               margin-bottom: 15px; 
+              page-break-inside: avoid;
             }
             .image-container { 
               margin-top: 20px; 
@@ -172,6 +175,7 @@ export class UrbanAnalysisService{
               width: 100%;
               border-collapse: collapse;
               margin: 10px 0;
+              page-break-inside: avoid;
             }
             td, th {
               padding: 8px;
@@ -182,6 +186,7 @@ export class UrbanAnalysisService{
               padding: 15px;
               background: #f5f5f5;
               border-radius: 4px;
+              page-break-inside: avoid;
             }
             .stats-title {
               font-size: 16px;
@@ -201,6 +206,11 @@ export class UrbanAnalysisService{
             <img src="${originalImageBase64}" alt="本次分析图像">
           </div>
 
+          <div class="section-title">检测结果图像:</div>
+          <div class="image-container">
+            <img src="${detectionResultBase64}" alt="检测结果图像">
+          </div>
+
           <div class="section-title">目标检测统计:</div>
           <div class="detection-stats">
             <div class="stats-item">检测目标总数：${detectionStats.totalObjects}</div>
@@ -212,7 +222,7 @@ export class UrbanAnalysisService{
                 <th>类别名称</th>
                 <th>数量</th>
               </tr>
-              ${detectionStats.categories.map(cat => `
+              ${detectionStats.categories.map((cat: { name: string; count: number }) => `
                 <tr>
                   <td>${cat.name}</td>
                   <td>${cat.count}</td>
@@ -261,10 +271,10 @@ export class UrbanAnalysisService{
         headless: true,
         args: ['--no-sandbox']
       });
-      
+
       const page = await browser.newPage();
       await page.setContent(html, { waitUntil: 'networkidle0' });
-      
+
       // 生成 PDF
       await page.pdf({
         path: outputPath,

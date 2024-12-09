@@ -16,6 +16,11 @@ interface DetectionSummary {
   rawDetections: Detection[];        // 原始检测数据
 }
 
+// 新增接口
+interface DetectionResultWithImage extends DetectionSummary {
+  resultImageBase64: string;
+}
+
 /**
  * 调用检测 API 获取检测结果
  * @param file - 图片文件
@@ -69,6 +74,52 @@ export const getDetectionResult = async (file: File): Promise<DetectionSummary> 
       throw new Error('请确保已启用 CORS Unblock 扩展');
     }
     
+    throw error;
+  }
+};
+
+// 新增函数
+export const getDetectionImageBase64 = async (file: File): Promise<string> => {
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch('http://10.16.32.190:8000/api/detect', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`请求失败: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error('Detection failed');
+    }
+
+    // 获取结果图片并转换为 base64
+    const resultImageUrl = `http://10.16.32.190:8000${data.image_url}`;
+    const imageResponse = await fetch(resultImageUrl);
+    if (!imageResponse.ok) {
+      throw new Error('Failed to fetch result image');
+    }
+    const imageBuffer = await imageResponse.arrayBuffer();
+    const resultImageBase64 = Buffer.from(imageBuffer).toString('base64');
+
+    return `data:image/jpeg;base64,${resultImageBase64}`;
+
+  } catch (error) {
+    console.error('请求失败:', {
+      error,
+      message: error instanceof Error ? error.message : '未知错误'
+    });
+
+    if (error instanceof Error && error.message.includes('CORS')) {
+      throw new Error('请确保已启用 CORS Unblock 扩展');
+    }
+
     throw error;
   }
 }; 
