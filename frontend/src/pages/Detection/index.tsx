@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { Card, Upload, Button, Space, Spin, message, Tag } from 'antd';
 import { UploadOutlined, AimOutlined } from '@ant-design/icons';
-import type { UploadFile } from 'antd/es/upload/interface';
-import { detectObjects } from '../../services/detection';
 import type { DetectionResult, Detection, DetectionResponse } from '../../types/detection';
+import type { DetectionStats, CategoryCount } from '../../types/apiStats';
+import { getDetectionResult } from '../../utils/detection';
 import styles from './index.module.css';
 
 const DetectionPage: React.FC = () => {
   const [detectionResult, setDetectionResult] = useState<DetectionResult | null>(null);
   const [fileList, setFileList] = useState<any[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [apiStats, setApiStats] = useState<DetectionStats | null>(null);
 
   const handleDetectionComplete = (allDetections: Detection[], resultImageUrl: string) => {
     setDetectionResult({
@@ -100,6 +101,14 @@ const DetectionPage: React.FC = () => {
 
       handleDetectionComplete(allDetections, resultImageUrl);
 
+      // 额外调用新的 API
+      try {
+        const statsResult = await getDetectionResult(file);
+        setApiStats(statsResult);
+      } catch (statsError) {
+        console.error('获取统计数据失败:', statsError);
+      }
+
     } catch (error) {
       console.error('Detection failed:', error);
       message.error('检测失败，请重试');
@@ -111,22 +120,32 @@ const DetectionPage: React.FC = () => {
   const renderResults = () => {
     if (!detectionResult) return null;
 
-    const { detections, processingTime } = detectionResult;
-    const objectCounts: { [key: string]: number } = detections.reduce(
-      (acc: { [key: string]: number }, curr: Detection) => {
-        acc[curr.label] = (acc[curr.label] || 0) + 1;
-        return acc;
-      },
-      {}
-    );
-
     return (
       <div className={styles.results}>
-        <div className={styles.statistics}>
-          <div>检测目标总数：{detections.length}</div>
-          <div>检测耗时：{processingTime.toFixed(2)}</div>
-        </div>
-
+        {apiStats && (
+          <div className={styles.apiStatistics}>
+            <Card title="目标检测统计" style={{ marginTop: 16 }}>
+              <Space direction="vertical" style={{ width: '100%' }}>
+                <div className={styles.statsRow}>
+                  <Tag color="blue">检测目标总数：{apiStats.totalObjects}</Tag>
+                  <Tag color="green">检测类别总数：{apiStats.totalCategories}</Tag>
+                </div>
+                
+                <div className={styles.categoryStats}>
+                  <span style={{ marginRight: 8 }}>类别详情：</span>
+                  {apiStats.categories.map((category: CategoryCount, index: number) => (
+                    <Tag 
+                      key={index} 
+                      color={getTagColor(index)}
+                    >
+                      {category.name}: {category.count}个
+                    </Tag>
+                  ))}
+                </div>
+              </Space>
+            </Card>
+          </div>
+        )}
       </div>
     );
   };
@@ -136,67 +155,91 @@ const DetectionPage: React.FC = () => {
     setDetectionResult(null);
   };
 
+  const getTagColor = (index: number): string => {
+    const colors = ['blue', 'green', 'orange', 'purple', 'cyan', 'magenta'];
+    return colors[index % colors.length];
+  };
+
   return (
-    <div className={styles.container}>
-      <Card>
-        <div className={styles.spinContainer}>
-          <Spin spinning={uploading}>
-            <Space direction="vertical" size="large" style={{ width: '100%', gap: 0 }}>
-              <Card title="图像上传与检测" className={styles.card}>
-                <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-                  <Upload
-                    fileList={fileList}
-                    onChange={handleUpload}
-                    maxCount={1}
-                    beforeUpload={() => false}
-                    accept="image/*"
-                  >
-                    <Button icon={<UploadOutlined />}>选择图片</Button>
-                  </Upload>
-                  <Button
-                    type="primary"
-                    icon={<AimOutlined />}
-                    onClick={handleDetection}
-                    loading={uploading}
-                    disabled={fileList.length === 0}
-                  >
-                    开始检测
-                  </Button>
+    <div className={styles.pageContainer}>
+      <Card className={styles.mainCard}>
+        {/* 上方控制区：左侧上传控件，右侧统计信息 */}
+        <div className={styles.controlsWrapper}>
+          {/* 左侧：上传和检测按钮 */}
+          <div className={styles.uploadControls}>
+            <Card title="图像上传与检测" className={styles.innerCard}>
+              <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+                <Upload
+                  fileList={fileList}
+                  onChange={handleUpload}
+                  maxCount={1}
+                  beforeUpload={() => false}
+                  accept="image/*"
+                >
+                  <Button icon={<UploadOutlined />}>选择图片</Button>
+                </Upload>
+                <Button
+                  type="primary"
+                  icon={<AimOutlined />}
+                  onClick={handleDetection}
+                  loading={uploading}
+                  disabled={fileList.length === 0}
+                >
+                  开始检测
+                </Button>
+              </Space>
+            </Card>
+          </div>
+
+          {/* 右侧：统计信息 */}
+          {apiStats && (
+            <div className={styles.statsPanel}>
+              <Card title="目标检测统计" className={styles.innerCard}>
+                <Space direction="vertical" style={{ width: '100%' }}>
+                  <div className={styles.statsRow}>
+                    <Tag color="blue">检测目标总数：{apiStats.totalObjects}</Tag>
+                    <Tag color="green">检测类别总数：{apiStats.totalCategories}</Tag>
+                  </div>
+                  
+                  <div className={styles.categoryStats}>
+                    <span style={{ marginRight: 8 }}>类别详情：</span>
+                    {apiStats.categories.map((category: CategoryCount, index: number) => (
+                      <Tag 
+                        key={index} 
+                        color={getTagColor(index)}
+                      >
+                        {category.name}: {category.count}个
+                      </Tag>
+                    ))}
+                  </div>
                 </Space>
               </Card>
+            </div>
+          )}
+        </div>
 
-              <div className={styles.imageContainer}>
-                <Card title="原始图像" className={styles.imageCard}>
-                  {fileList[0]?.originFileObj && (
-                    <img
-                      src={URL.createObjectURL(fileList[0].originFileObj as Blob)}
-                      alt="原始图像"
-                      className={styles.image}
-                    />
-                  )}
-                </Card>
-
-                <Card title="检测结果" className={styles.imageCard}>
-                  {uploading ? (
-                    <div className={styles.loadingContainer}>
-                      <Spin tip="正在检测中..." />
-                    </div>
-                  ) : (
-                    detectionResult && (
-                      <div className={styles.resultContainer}>
-                        <img
-                          src={detectionResult.resultImage}
-                          alt="检测结果"
-                          className={styles.image}
-                        />
-                        {renderResults()}
-                      </div>
-                    )
-                  )}
-                </Card>
-              </div>
-            </Space>
-          </Spin>
+        {/* 下方图片展示区：横向排列 */}
+        <div className={styles.imagesPanel}>
+          <div className={styles.imageRow}>
+            <Card title="原始图像" className={styles.imageCard + ' ' + styles.innerCard}>
+              {fileList.length > 0 && (
+                <img
+                  src={URL.createObjectURL(fileList[0].originFileObj)}
+                  alt="原始图像"
+                  className={styles.previewImage}
+                />
+              )}
+            </Card>
+            <Card title="检测结果" className={styles.imageCard + ' ' + styles.innerCard}>
+              {detectionResult && detectionResult.resultImage && (
+                <img
+                  src={detectionResult.resultImage}
+                  alt="检测结果"
+                  className={styles.resultImage}
+                />
+              )}
+            </Card>
+          </div>
         </div>
       </Card>
     </div>

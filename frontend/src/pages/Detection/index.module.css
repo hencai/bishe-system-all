@@ -1,112 +1,66 @@
-.container {
+.pageContainer {
   padding: 24px;
 }
 
-.card {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  border-radius: 8px;
+.mainCard {
+  background: #f5f5f5;
+  padding: 24px;
 }
 
-.card :global(.ant-card-head) {
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.card :global(.ant-card-head-title) {
-  font-size: 18px;
-  color: #1890ff;
-}
-
-.imageContainer {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  margin-top: 24px;
-}
-
-.imageCard {
-  height: 100%;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  border-radius: 8px;
-}
-
-.image {
-  width: 100%;
-  max-height: 400px;
-  object-fit: contain;
+.innerCard {
+  background: #fff;
   border-radius: 4px;
 }
 
-.loadingContainer {
+.controlsWrapper {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 300px;
+  gap: 24px;
+  margin-bottom: 24px;
 }
 
-.resultContainer {
+.uploadControls {
+  flex: 1;
+  max-width: 400px;
+}
+
+.statsPanel {
+  flex: 1;
+  max-width: 500px;
+}
+
+.imagesPanel {
+  width: 100%;
+}
+
+.imageRow {
   display: flex;
-  flex-direction: column;
+  gap: 24px;
+}
+
+.imageCard {
+  flex: 1;
+  max-width: calc(50% - 12px);
+}
+
+.previewImage,
+.resultImage {
+  width: 100%;
+  height: auto;
+  max-height: 500px;
+  object-fit: contain;
+}
+
+.statsRow {
+  display: flex;
   gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
-.detectionInfo {
-  padding: 16px;
-  background: #f5f5f5;
-  border-radius: 8px;
-}
-
-.detectionInfo h3 {
-  margin: 0 0 12px 0;
-  color: #1890ff;
-}
-
-.detectionInfo ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.detectionInfo li {
-  margin: 8px 0;
-  color: #666;
-}
-
-@media (max-width: 768px) {
-  .imageContainer {
-    grid-template-columns: 1fr;
-  }
-} 
-
-.tagContainer {
-  margin-top: 8px;
+.categoryStats {
   display: flex;
+  align-items: center;
   flex-wrap: wrap;
   gap: 8px;
-}
-
-.tagContainer :global(.ant-tag) {
-  margin: 0;
-  padding: 4px 8px;
-  font-size: 12px;
-}
-
-.detectionList {
   margin-top: 8px;
-}
-
-.detectionItem {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 4px 0;
-}
-
-.detectionItem span {
-  color: #666;
-  font-size: 12px;
-}
-
-.spinContainer {
-  position: relative;
-  min-height: 200px;
 }
