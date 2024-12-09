@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import puppeteer from 'puppeteer';
 import PDFDocument from 'pdfkit';
+import { getDetectionResult } from './detection';
 
 // DOTA数据集的目标类别
 const DOTA_CLASSES: Record<string, string> = {
@@ -120,6 +121,11 @@ export class UrbanAnalysisService{
     const outputPath = path.join('storage', 'reports', `urban_analysis_${Date.now()}.pdf`);
     await fs.promises.mkdir(path.dirname(outputPath), { recursive: true });
 
+    // 读取原始图片并获取检测统计
+    const imageBuffer = await fs.promises.readFile(originalImagePath);
+    const imageFile = new File([imageBuffer], path.basename(originalImagePath), { type: 'image/jpeg' });
+    const detectionStats = await getDetectionResult(imageFile);
+
     // 将图片转换为 base64
     const originalImageBase64 = fs.existsSync(originalImagePath) 
       ? `data:image/jpeg;base64,${fs.readFileSync(originalImagePath, 'base64')}`
@@ -171,6 +177,20 @@ export class UrbanAnalysisService{
               padding: 8px;
               border: 1px solid #ddd;
             }
+            .detection-stats {
+              margin: 20px 0;
+              padding: 15px;
+              background: #f5f5f5;
+              border-radius: 4px;
+            }
+            .stats-title {
+              font-size: 16px;
+              font-weight: bold;
+              margin-bottom: 10px;
+            }
+            .stats-item {
+              margin: 5px 0;
+            }
           </style>
         </head>
         <body>
@@ -179,6 +199,26 @@ export class UrbanAnalysisService{
           <div class="section-title">本次分析图像:</div>
           <div class="image-container">
             <img src="${originalImageBase64}" alt="本次分析图像">
+          </div>
+
+          <div class="section-title">目标检测统计:</div>
+          <div class="detection-stats">
+            <div class="stats-item">检测目标总数：${detectionStats.totalObjects}</div>
+            <div class="stats-item">检测类别总数：${detectionStats.totalCategories}</div>
+            
+            <div class="stats-title">类别详情:</div>
+            <table>
+              <tr>
+                <th>类别名称</th>
+                <th>数量</th>
+              </tr>
+              ${detectionStats.categories.map(cat => `
+                <tr>
+                  <td>${cat.name}</td>
+                  <td>${cat.count}</td>
+                </tr>
+              `).join('')}
+            </table>
           </div>
 
           <div class="section-title">关键指标分析:</div>
