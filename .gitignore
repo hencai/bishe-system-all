@@ -2,3 +2,4 @@ backend/checkpoints/
 backend/.idea/
 frontend/node_modules/
 local/node_modules/
+local/storage/
