@@ -27,7 +27,7 @@ const Report: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [pagination, setPagination] = useState<TablePaginationConfig>({
     current: 1,
-    pageSize: 5,
+    pageSize: 3,
     total: 0
   });
 
